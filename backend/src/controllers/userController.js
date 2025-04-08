@@ -17,9 +17,9 @@ exports.registerUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { username_or_email, password } = req.body;
     try {
-        const user = await pool.query('SELECT * FROM usuaris WHERE email = $1', [email]);
+        const user = await pool.query('SELECT * FROM usuaris WHERE email = $1 or username = $1', [username_or_email]);
         if (user.rows.length === 0) return res.status(401).json({ error: 'Usuari no trobat' });
 
         const validPassword = await bcrypt.compare(password, user.rows[0].password);
