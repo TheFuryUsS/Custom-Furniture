@@ -39,12 +39,12 @@ exports.getDesignById = async (req, res) => {
 // Crear un nou disseny
 exports.createDesign = async (req, res) => {
     const userId = req.user.id;
-    const { title, data } = req.body; // `data` conté el disseny en format JSON
+    const { name, data } = req.body; // data en format JSON
 
     try {
         const result = await pool.query(
-            'INSERT INTO designs (user_id, title, data) VALUES ($1, $2, $3) RETURNING *',
-            [userId, title, data]
+            'INSERT INTO designs (user_id, name, data) VALUES ($1, $2, $3) RETURNING *',
+            [userId, name, data]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
