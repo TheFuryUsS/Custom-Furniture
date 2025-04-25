@@ -2,6 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import TestApi from './components/TestApi';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -28,6 +29,11 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
+
+      <div>
+        <h1 className="text-2xl mb-4">Prova de Connexió API</h1>
+        <TestApi />
+      </div>
     </>
   )
 }
