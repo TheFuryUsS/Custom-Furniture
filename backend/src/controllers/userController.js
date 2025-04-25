@@ -34,3 +34,17 @@ exports.loginUser = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+// Get de tots els usuaris
+exports.getAllUsers = async (req, res) => {
+    try {
+      const result = await pool.query(
+        'SELECT * FROM users'
+      );
+      res.json(result.rows);
+    } catch (err) {
+      console.error('Error al obtenir usuaris:', err);
+      res.status(500).json({ error: 'Error al obtenir usuaris' });
+    }
+  };
