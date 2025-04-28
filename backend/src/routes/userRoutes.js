@@ -1,11 +1,13 @@
 // Rutes d'usuaris
 
 const express = require('express');
-const { registerUser, loginUser, getAllUsers } = require('../controllers/userController');
 const router = express.Router();
+const { registerUser, loginUser, getUser } = require('../controllers/userController');
+const authenticate = require('../middleware/auth');
+
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/', getAllUsers);
+router.get('/', authenticate, getUser);
 
 module.exports = router;

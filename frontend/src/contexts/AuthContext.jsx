@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         if (token) {
             localStorage.setItem('token', token);
-            api.defaults.headers.Authorization = `Bearer ${token}`;
+            api.defaults.headers.Authorization = token;
         } else {
             localStorage.removeItem('token');
             delete api.defaults.headers.Authorization;

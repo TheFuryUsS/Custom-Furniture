@@ -6,8 +6,7 @@ exports.getAllDesigns = async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT * FROM designs WHERE user_id = $1 ORDER BY created_at DESC',
-            [userId]
+            'SELECT * FROM designs WHERE user_id = $1 ORDER BY created_at DESC', [userId]
         );
         res.json(result.rows);
     } catch (err) {

@@ -36,15 +36,17 @@ exports.loginUser = async (req, res) => {
 };
 
 
-// Get de tots els usuaris
-exports.getAllUsers = async (req, res) => {
+// Get de l'usuari actual
+exports.getUser = async (req, res) => {
+    const userId = req.user.id;
+
     try {
-      const result = await pool.query(
-        'SELECT * FROM users'
-      );
-      res.json(result.rows);
+        const user = await pool.query(
+            'SELECT id, username, email FROM users WHERE id = $1', [userId]
+        );
+        res.json(user.rows[0]);
     } catch (err) {
-      console.error('Error al obtenir usuaris:', err);
-      res.status(500).json({ error: 'Error al obtenir usuaris' });
+        console.error('Error al obtenir usuari:', err);
+        res.status(500).json({ error: 'Error al obtenir usuari' });
     }
-  };
+};
