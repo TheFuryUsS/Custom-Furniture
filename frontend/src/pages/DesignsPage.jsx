@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
+import { Trash2 } from 'lucide-react'; // o qualsevol icona de brossa
 
 export default function DesignsPage() {
     const [designs, setDesigns] = useState([]);
@@ -15,7 +16,7 @@ export default function DesignsPage() {
     const handleNewDesign = async () => {
         const nextName = `Disseny ${designs.length + 1}`;
         try {
-            const res = await api.post('/designs', { 
+            const res = await api.post('/designs', {
                 name: nextName,
                 data: {}
             });
@@ -23,6 +24,19 @@ export default function DesignsPage() {
         } catch (err) {
             console.error('Error creant el disseny:', err);
             alert('No s’ha pogut crear el disseny');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        const confirm = window.confirm('Segur que vols eliminar aquest disseny?');
+        if (!confirm) return;
+
+        try {
+            await api.delete(`/designs/${id}`);
+            setDesigns(prev => prev.filter(d => d.id !== id));
+        } catch (err) {
+            console.error('Error esborrant:', err);
+            alert('No s’ha pogut eliminar el disseny');
         }
     };
 
@@ -38,10 +52,22 @@ export default function DesignsPage() {
 
 
                 {designs.map(d => (
-                    <div key={d.id} className="border p-4 rounded shadow hover:shadow-md cursor-pointer" onClick={() => navigate(`/editor/${d.id}`)}>
-                        <h3 className="font-semibold text-lg mb-2">{d.name}</h3>
-                        <p className="text-sm text-gray-600">ID: {d.id}</p>
-                        {/* afegir imatge preview per ex. */}
+                    <div key={d.id} className="relative border p-4 rounded shadow hover:shadow-md cursor-pointer group">
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); // per a que no ho detecti com a clic a la card
+                                handleDelete(d.id);
+                            }}
+                            className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+
+                        <div onClick={() => navigate(`/editor/${d.id}`)}>
+                            <h3 className="font-semibold text-lg mb-2">{d.name}</h3>
+                            <p className="text-sm text-gray-600">ID: {d.id}</p>
+                        </div>
                     </div>
                 ))}
             </div>

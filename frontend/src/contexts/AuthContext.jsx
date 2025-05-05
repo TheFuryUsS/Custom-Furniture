@@ -12,7 +12,6 @@ export function AuthProvider({ children }) {
         setUser(null);
         localStorage.removeItem('token');
         delete api.defaults.headers.Authorization;
-        nav('/login');
     };
 
     useEffect(() => {
