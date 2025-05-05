@@ -4,8 +4,8 @@ import Footer from '../components/Footer';
 
 export default function PublicLayout() {
     return (
-        <div>
-            <main>
+        <div className="flex flex-col min-h-screen w-full">
+            <main className="flex-grow w-full">
                 <Outlet />  {/* LandingPage, LoginPage */}
             </main>
             <Footer />

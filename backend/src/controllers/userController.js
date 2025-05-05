@@ -36,7 +36,7 @@ exports.loginUser = async (req, res) => {
 };
 
 
-// Get de l'usuari actual
+// Get actual user
 exports.getUser = async (req, res) => {
     const userId = req.user.id;
 
