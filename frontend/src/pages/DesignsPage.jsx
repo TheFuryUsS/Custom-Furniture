@@ -5,6 +5,9 @@ import { Trash2 } from 'lucide-react'; // o qualsevol icona de brossa
 
 export default function DesignsPage() {
     const [designs, setDesigns] = useState([]);
+    const [showPopup, setShowPopup] = useState(false);
+    const [newName, setNewName] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -13,17 +16,34 @@ export default function DesignsPage() {
             .catch(err => console.error(err));
     }, []);
 
-    const handleNewDesign = async () => {
-        const nextName = `Disseny ${designs.length + 1}`;
+    const handleNewDesignClick = () => {
+        setNewName('');
+        setError('');
+        setShowPopup(true);
+    };
+
+    const handleCreateDesign = async () => {
+        const nameExists = designs.some(d => d.name.trim().toLowerCase() === newName.trim().toLowerCase());
+        if (!newName.trim()) {
+            setError('El nom no pot estar buit.');
+            return;
+        }
+        if (nameExists) {
+            setError('Ja existeix un disseny amb aquest nom.');
+            return;
+        }
+
         try {
             const res = await api.post('/designs', {
-                name: nextName,
+                name: newName.trim(),
                 data: {}
             });
             navigate(`/editor/${res.data.id}`);
         } catch (err) {
-            console.error('Error creant el disseny:', err);
+            console.error('Error creant disseny:', err);
             alert('No s’ha pogut crear el disseny');
+        } finally {
+            setShowPopup(false);
         }
     };
 
@@ -34,6 +54,7 @@ export default function DesignsPage() {
         try {
             await api.delete(`/designs/${id}`);
             setDesigns(prev => prev.filter(d => d.id !== id));
+            alert('Disseny eliminat correctament.');
         } catch (err) {
             console.error('Error esborrant:', err);
             alert('No s’ha pogut eliminar el disseny');
@@ -43,9 +64,42 @@ export default function DesignsPage() {
     return (
         <div>
             <h2 className="text-xl font-semibold mb-4">Els meus dissenys</h2>
+
+            {/* POPUP */}
+            {showPopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
+                        <h3 className="text-lg font-semibold mb-2">Nom del nou disseny</h3>
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            className="w-full border p-2 rounded mb-2"
+                            placeholder="Ex. Disseny catifa 4"
+                        />
+                        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => setShowPopup(false)}
+                                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                                Cancel·lar
+                            </button>
+                            <button
+                                onClick={handleCreateDesign}
+                                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            >
+                                Crear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* DISSENYS */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-                <div onClick={handleNewDesign} className="border-2 border-dashed border-blue-400 p-6 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50">
+                <div onClick={handleNewDesignClick} className="border-2 border-dashed border-blue-400 p-6 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50">
                     <span className="text-4xl text-blue-500">＋</span>
                     <p className="mt-2 font-medium text-blue-700">Nou disseny</p>
                 </div>
