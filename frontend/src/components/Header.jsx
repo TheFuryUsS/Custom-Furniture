@@ -1,6 +1,5 @@
-import React from 'react';
+import { React, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 
 export default function Header() {
@@ -12,20 +11,34 @@ export default function Header() {
         nav('/');
     };
 
-    return (
-        <header className="bg-white shadow p-4 flex items-center justify-between">
-            <Link to="/" className="text-xl font-bold">🏠 Decorador</Link>
-            {token && (
-                <nav className="flex items-center space-x-4">
-                    <Link to="/designs" className="hover:underline">Dissenys</Link>
-                    <Link to="/profile" className="hover:underline">Perfil</Link>
 
+    return (
+        <header className="bg-slate-100 shadow-md p-4 flex items-center justify-between font-sans">
+            <Link to="/" className="flex items-center">
+                <img src="/logo.png" alt="img logo" className="h-10 w-auto transition-transform duration-300 hover:scale-105" />
+            </Link>
+
+            {/* Mostra només si hi ha usuari loguejat (per si més tard incloc el header a la landing o altres pags) */}
+            {token && (
+                <nav className="flex items-center space-x-6 text-sm">
+                    <Link to="/designs" className="relative text-gray-700 hover:text-blue-600 transition duration-200 group">
+                        <span className="group-hover:border-blue-600 pb-1 border-b-2 border-transparent transition-all duration-300">Dissenys</span>
+                    </Link>
+                    <Link to="/profile" className="relative text-gray-700 hover:text-blue-600 transition duration-200 group">
+                        <span className="group-hover:border-blue-600 pb-1 border-b-2 border-transparent transition-all duration-300">Perfil</span>
+                    </Link>
+
+                    {/* Lletra usuari */}
                     {user && (
                         <div title={user.username} className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded-full uppercase font-semibold">
                             {user.username?.charAt(0)}
                         </div>
                     )}
-                    <button onClick={handleLogout} className="text-red-500 ml-2">Log Out</button>
+
+                    {/* Logout */}
+                    <button onClick={handleLogout} className="relative text-red-500 hover:text-red-600 transition duration-200 group">
+                        <span className="group-hover:border-red-500 pb-1 border-b-2 border-transparent transition-all duration-300">Log Out</span>
+                    </button>
                 </nav>
             )}
         </header>
