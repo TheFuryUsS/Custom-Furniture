@@ -4,6 +4,7 @@ import { AuthContext } from './contexts/AuthContext';
 
 import PublicLayout from './layouts/PublicLayout';
 import AuthLayout from './layouts/AuthLayout';
+import EditorLayout from './layouts/EditorLayout';
 
 import DesignsPage from './pages/DesignsPage';
 import EditorPage from './pages/EditorPage';
@@ -31,6 +32,10 @@ export default function App() {
         <Route element={<PrivateRoute><AuthLayout /></PrivateRoute>}>
           <Route path="/designs" element={<DesignsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+
+
+        <Route element={<PrivateRoute><EditorLayout /></PrivateRoute>}>
           <Route path="/editor/:id" element={<EditorPage />} />
         </Route>
 

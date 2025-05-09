@@ -18,7 +18,7 @@ export default function AuthLayout() {
         <div className="min-h-screen flex flex-col">
             <Header />
             <main className="flex-grow p-4 bg-gray-50">
-                <Outlet /> {/* EditorPage, DesignsPage, ProfilePage */}
+                <Outlet /> {/* DesignsPage, ProfilePage */}
             </main>
             <Footer />
         </div>

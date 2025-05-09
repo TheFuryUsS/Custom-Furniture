@@ -13,4 +13,6 @@ router.post('/', authenticate, designController.createDesign);
 
 router.delete('/:id', authenticate, designController.deleteDesign);
 
+router.put('/:id', authenticate, designController.updateDesign);
+
 module.exports = router;

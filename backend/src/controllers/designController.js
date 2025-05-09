@@ -67,3 +67,27 @@ exports.deleteDesign = async (req, res) => {
         res.status(500).json({ error: 'Error al esborrar el disseny' });
     }
 };
+
+
+// Actualitzar nom disseny
+exports.updateDesign = async (req, res) => {
+    const userId = req.user.id;
+    const designId = req.params.id;
+    const { name } = req.body;
+
+    try {
+        const result = await pool.query(
+            'UPDATE designs SET name = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+            [name, designId, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Disseny no trobat' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error actualitzant el disseny:', err);
+        res.status(500).json({ error: 'Error al actualitzar el disseny' });
+    }
+};
