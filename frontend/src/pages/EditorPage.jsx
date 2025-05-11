@@ -17,7 +17,7 @@ export default function EditorPage() {
             .catch(() => {
                 navigate('/designs');
             })
-    }, id);
+    }, [id]);
 
     return (
         <div className="flex flex-col h-screen">
