@@ -12,7 +12,7 @@ export default function AuthLayout() {
         if (!token) {
             navigate('/login');
         }
-    }, token);
+    }, [token]);
 
     return (
         <div className="min-h-screen flex flex-col">

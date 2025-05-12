@@ -1,4 +1,4 @@
-import { React, useContext } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 
@@ -22,7 +22,7 @@ export default function LandingPage() {
                 <p className="text-gray-600 mb-6">Crea i personalitza els teus productes decoratius online.</p>
                 <button onClick={handleLogin} 
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition duration-300">
-                    Inicia sessió o Registra’t
+                    Comença a editar!
                 </button>
             </div>
         </div>

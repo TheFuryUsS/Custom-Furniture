@@ -1,39 +1,68 @@
-import React, { useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import * as fabric from 'fabric';
+import api from '../lib/api';
+import SidebarPanel from './canvas/SidebarPanel';
 
 export default function CanvasEditor() {
-    const [elements, setElements] = useState([]);
+    const canvasRef = useRef(null);
+    const [canvas, setCanvas] = useState(null);
+    const { id } = useParams();
 
-    const addText = () => {
-        setElements(prev => [
-            ...prev,
-            { id: Date.now(), type: 'text', content: 'Text nou', x: 100, y: 100 }
-        ]);
+    // Inicialitza Fabric.js
+    useEffect(() => {
+        const fabricCanvas = new fabric.Canvas(canvasRef.current, {
+            width: 900,
+            height: 600,
+            backgroundColor: '#ffffff',
+        });
+
+        setCanvas(fabricCanvas);
+
+        return () => fabricCanvas.dispose();
+    }, []);
+
+    // Segon useEffect per evitar errors quan canvas es null (només quan canvia el canvas i l'id)
+    useEffect(() => {
+        if (!canvas) return;
+
+        api.get(`/designs/${id}`)
+            .then(res => {
+                const designData = res.data?.data;
+                if (designData) {
+                    canvas.loadFromJSON(designData, () => {
+                        setTimeout(() => { // Per a que el renderAll s'executi correctament abans que el canvas carregui els objectes
+                            canvas.renderAll();
+                            canvas.calcOffset();
+                        }, 0);
+                    });
+                }
+            })
+            .catch(err => {
+                console.error('Error carregant el disseny:', err);
+            });
+    }, [canvas, id]);
+
+
+    const handleSave = async () => {
+        if (!canvas) return;
+        const jsonDisseny = canvas.toJSON();
+
+        try {
+            await api.put(`/designs/${id}`, { data: jsonDisseny });
+            alert('Disseny desat correctament');
+        } catch (err) {
+            console.error('Error desant el disseny:', err);
+            alert('No s’ha pogut desar');
+        }
     };
 
-    const addImage = () => {
-        setElements(prev => [
-            ...prev,
-            { id: Date.now(), type: 'image', src: './logobo.png', x: 150, y: 150 }
-        ]);
-    };
 
     return (
-        <div>
-            <div className="mb-4 space-x-2">
-                <button onClick={addText} className="px-4 py-2 bg-blue-600 text-white rounded">Afegir text</button>
-                <button onClick={addImage} className="px-4 py-2 bg-purple-600 text-white rounded">Afegir imatge</button>
-            </div>
-            <div className="relative border border-gray-400 w-full h-[600px] bg-white">
-                {elements.map(el => (
-                    <div
-                        key={el.id}
-                        style={{ position: 'absolute', top: el.y, left: el.x }}
-                        className="border border-dashed p-1 bg-opacity-90 bg-white"
-                    >
-                        {el.type === 'text' && <p>{el.content}</p>}
-                        {el.type === 'image' && <img src={el.src} alt="element" />}
-                    </div>
-                ))}
+        <div className="flex h-full">
+            <SidebarPanel canvas={canvas} onSave={handleSave} />
+            <div className="flex-grow flex justify-center items-center bg-gray-50 p-4">
+                <canvas id="editor-canvas" ref={canvasRef} className="border shadow" />
             </div>
         </div>
     );
