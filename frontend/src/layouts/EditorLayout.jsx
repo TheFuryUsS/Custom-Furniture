@@ -4,9 +4,9 @@ import EditorHeader from '../components/EditorHeader';
 
 export default function EditorLayout() {
     return (
-        <div className="min-h-screen flex flex-col bg-white">
+        <div className="w-screen h-screen flex flex-col bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/canvasBackground.jpg')" }}>
             <EditorHeader />
-            <main className="flex-grow p-4">
+            <main className="flex-grow relative">
                 <Outlet />
             </main>
         </div>

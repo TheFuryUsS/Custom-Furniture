@@ -9,12 +9,19 @@ export default function CanvasEditor() {
     const [canvas, setCanvas] = useState(null);
     const { id } = useParams();
 
+    const BASE_IMAGES = {
+        moble: '/base-moble.png',
+        catifa: '/base-catifa.png',
+        lampara: '/base-lampara.png',
+    };
+
     // Inicialitza Fabric.js
     useEffect(() => {
         const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-            width: 900,
-            height: 600,
-            backgroundColor: '#ffffff',
+            width: window.innerWidth,
+            height: window.innerHeight,
+            backgroundColor: 'transparent',
+            selection: false,
         });
 
         setCanvas(fabricCanvas);
@@ -29,6 +36,20 @@ export default function CanvasEditor() {
         api.get(`/designs/${id}`)
             .then(res => {
                 const designData = res.data?.data;
+                const designType = res.data?.type;
+                const backgroundImageUrl = BASE_IMAGES[designType] || '/base-default.png';
+
+                fabric.util.loadImage(backgroundImageUrl, (img) => {
+                    if (img) {
+                        const fabricImage = new fabric.Image(img, {
+                            scaleX: canvas.width / img.width,
+                            scaleY: canvas.height / img.height,
+                            selectable: false,
+                        });
+                        canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+                    }
+                });
+
                 if (designData) {
                     canvas.loadFromJSON(designData, () => {
                         setTimeout(() => { // Per a que el renderAll s'executi correctament abans que el canvas carregui els objectes
@@ -49,7 +70,7 @@ export default function CanvasEditor() {
         const jsonDisseny = canvas.toJSON();
 
         try {
-            await api.put(`/designs/${id}`, { data: jsonDisseny });
+            await api.put(`/designs/${id}`, { data: jsonDisseny/*, type: designType*/ });
             alert('Disseny desat correctament');
         } catch (err) {
             console.error('Error desant el disseny:', err);
@@ -59,10 +80,10 @@ export default function CanvasEditor() {
 
 
     return (
-        <div className="flex h-full">
+        <div className="flex h-screen">
             <SidebarPanel canvas={canvas} onSave={handleSave} />
-            <div className="flex-grow flex justify-center items-center bg-gray-50 p-4">
-                <canvas id="editor-canvas" ref={canvasRef} className="border shadow" />
+            <div className="flex-grow relative">
+                <canvas ref={canvasRef} className="w-full h-full" />
             </div>
         </div>
     );

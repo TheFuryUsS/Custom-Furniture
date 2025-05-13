@@ -21,7 +21,7 @@ export default function EditorPage() {
 
     return (
         <div className="flex flex-col h-screen">
-            <div className="flex-grow p-2">
+            <div className="flex-grow">
                 <CanvasEditor />
             </div>
         </div>

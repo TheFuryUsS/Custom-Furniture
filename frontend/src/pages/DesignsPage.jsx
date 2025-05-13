@@ -7,6 +7,7 @@ export default function DesignsPage() {
     const [designs, setDesigns] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
     const [newName, setNewName] = useState('');
+    const [newType, setNewType] = useState(''); // Declaració de newType
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -28,6 +29,10 @@ export default function DesignsPage() {
             setError('El nom no pot estar buit.');
             return;
         }
+        if (!newType) {
+            setError('Has de seleccionar un tipus de disseny.');
+            return;
+        }
         if (nameExists) {
             setError('Ja existeix un disseny amb aquest nom.');
             return;
@@ -36,6 +41,7 @@ export default function DesignsPage() {
         try {
             const res = await api.post('/designs', {
                 name: newName.trim(),
+                type: newType,
                 data: {}
             });
             navigate(`/editor/${res.data.id}`);
@@ -77,6 +83,15 @@ export default function DesignsPage() {
                             className="w-full border p-2 rounded mb-2"
                             placeholder="Ex. Disseny catifa 4"
                         />
+                        <select value={newType} onChange={(e) => setNewType(e.target.value)} className="w-full border p-2 rounded mb-2">
+                            <option value="">Quin tipus de moble vols personalitzar?</option>
+                            <option value="moble">Moble</option>
+                            <option value="catifa">Catifa</option>
+                            <option value="lampara">Làmpara</option>
+                        </select>
+
+
+
                         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
                         <div className="flex justify-end gap-2">
                             <button
@@ -104,24 +119,22 @@ export default function DesignsPage() {
                     <p className="mt-2 font-medium text-blue-700">Nou disseny</p>
                 </div>
 
-
-                {designs.map(d => (
-                    <div key={d.id} className="relative border p-4 rounded shadow hover:shadow-md cursor-pointer group">
+                {designs.map(d => ( // For als dissenys
+                    <div key={d.id}
+                        onClick={() => navigate(`/editor/${d.id}`)}
+                        className="relative border p-4 rounded shadow hover:shadow-md cursor-pointer group">
 
                         <button
                             onClick={(e) => {
-                                e.stopPropagation(); // per a que no ho detecti com a clic a la card
+                                e.stopPropagation(); // evita que el clic del botó afecti el clic de la card
                                 handleDelete(d.id);
                             }}
-                            className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"
-                        >
+                            className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto">
                             <Trash2 size={18} />
                         </button>
 
-                        <div onClick={() => navigate(`/editor/${d.id}`)}>
-                            <h3 className="font-semibold text-lg mb-2">{d.name}</h3>
-                            <p className="text-sm text-gray-600">ID: {d.id}</p>
-                        </div>
+                        <h3 className="font-semibold text-lg mb-2">{d.name}</h3>
+                        <p className="text-sm text-gray-600">ID: {d.id}</p>
                     </div>
                 ))}
             </div>

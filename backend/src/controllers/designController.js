@@ -38,12 +38,12 @@ exports.getDesignById = async (req, res) => {
 // Crear un nou disseny
 exports.createDesign = async (req, res) => {
     const userId = req.user.id;
-    const { name, data } = req.body; // data en format JSON
+    const { name, data, type } = req.body; // data en format JSON
 
     try {
         const result = await pool.query(
-            'INSERT INTO designs (user_id, name, data) VALUES ($1, $2, $3) RETURNING *',
-            [userId, name, data]
+            'INSERT INTO designs (user_id, name, data, type) VALUES ($1, $2, $3, $4) RETURNING *',
+            [userId, name, data, type]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -73,16 +73,16 @@ exports.deleteDesign = async (req, res) => {
 exports.updateDesign = async (req, res) => {
     const userId = req.user.id;
     const designId = req.params.id;
-    const { name, data } = req.body;
+    const { name, data, type } = req.body;
 
     try {
-        const result = await pool.query(
-            `UPDATE designs 
-             SET name = COALESCE($1, name),
-                 data = COALESCE($2, data) 
-             WHERE id = $3 AND user_id = $4 
-             RETURNING *`,
-            [name, data, designId, userId]
+        const result = await pool.query(`UPDATE designs
+            SET name = COALESCE($1, name),
+            data = COALESCE($2, data),
+            type = COALESCE($3, type)
+            WHERE id = $4 AND user_id = $5
+            RETURNING *`,
+            [name, data, type, designId, userId]
         );
 
         if (result.rows.length === 0) {
