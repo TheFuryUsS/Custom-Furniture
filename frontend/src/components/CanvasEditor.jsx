@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import * as fabric from 'fabric';
+import { FabricImage } from 'fabric';
 import api from '../lib/api';
 import SidebarPanel from './canvas/SidebarPanel';
 
@@ -35,20 +36,22 @@ export default function CanvasEditor() {
 
         api.get(`/designs/${id}`)
             .then(res => {
+
                 const designData = res.data?.data;
                 const designType = res.data?.type;
-                const backgroundImageUrl = BASE_IMAGES[designType] || '/base-default.png';
+                const imatgeMoble = BASE_IMAGES[designType];
 
-                fabric.util.loadImage(backgroundImageUrl, (img) => {
-                    if (img) {
-                        const fabricImage = new fabric.Image(img, {
-                            scaleX: canvas.width / img.width,
-                            scaleY: canvas.height / img.height,
-                            selectable: false,
-                        });
-                        canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
-                    }
+                fabric.FabricImage.fromURL(imatgeMoble).then(function (img) {
+                    canvas.backgroundImage = img;
+                    //img.canvas = canvas;
+
+                    //canvas.add(img);
+                    //canvas.sendToBack(img);
+                    canvas.renderAll();
                 });
+
+                
+
 
                 if (designData) {
                     canvas.loadFromJSON(designData, () => {
@@ -82,8 +85,8 @@ export default function CanvasEditor() {
     return (
         <div className="flex h-screen">
             <SidebarPanel canvas={canvas} onSave={handleSave} />
-            <div className="flex-grow relative">
-                <canvas ref={canvasRef} className="w-full h-full" />
+            <div className="flex-grow flex justify-center items-center">
+                <canvas ref={canvasRef} />
             </div>
         </div>
     );
