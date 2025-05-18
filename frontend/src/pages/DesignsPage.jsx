@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Trash2 } from 'lucide-react'; // o qualsevol icona de brossa
+import { BedSingle, LampFloor, Barcode, Trash2 } from 'lucide-react';
 
 export default function DesignsPage() {
     const [designs, setDesigns] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
     const [newName, setNewName] = useState('');
-    const [newType, setNewType] = useState(''); // Declaració de newType
+    const [newType, setNewType] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const ICON = {
+        moble: BedSingle,
+        catifa: Barcode,
+        lampara: LampFloor,
+    };
 
     useEffect(() => {
         api.get('/designs')
@@ -84,26 +90,18 @@ export default function DesignsPage() {
                             placeholder="Ex. Disseny catifa 4"
                         />
                         <select value={newType} onChange={(e) => setNewType(e.target.value)} className="w-full border p-2 rounded mb-2">
-                            <option value="">Quin tipus de moble vols personalitzar?</option>
+                            <option value="" disabled hidden>Quin tipus de moble vols personalitzar?</option>
                             <option value="moble">Moble</option>
                             <option value="catifa">Catifa</option>
                             <option value="lampara">Làmpara</option>
                         </select>
 
-
-
                         {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
                         <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => setShowPopup(false)}
-                                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                            >
+                            <button onClick={() => setShowPopup(false)} className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
                                 Cancel·lar
                             </button>
-                            <button
-                                onClick={handleCreateDesign}
-                                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            >
+                            <button onClick={handleCreateDesign} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
                                 Crear
                             </button>
                         </div>
@@ -119,24 +117,31 @@ export default function DesignsPage() {
                     <p className="mt-2 font-medium text-blue-700">Nou disseny</p>
                 </div>
 
-                {designs.map(d => ( // For als dissenys
-                    <div key={d.id}
-                        onClick={() => navigate(`/editor/${d.id}`)}
-                        className="relative border p-4 rounded shadow hover:shadow-md cursor-pointer group">
+                {designs.map(d => {
+                    const IconComponent = ICON[d.type];
+                    return (
+                        <div key={d.id}
+                            onClick={() => navigate(`/editor/${d.id}`)}
+                            className="relative border p-4 rounded shadow hover:shadow-md cursor-pointer group">
 
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation(); // evita que el clic del botó afecti el clic de la card
-                                handleDelete(d.id);
-                            }}
-                            className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto">
-                            <Trash2 size={18} />
-                        </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Per a que no detecti el clic a la card
+                                    handleDelete(d.id);
+                                }}
+                                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition pointer-events-none group-hover:pointer-events-auto">
+                                <Trash2 size={18} />
+                            </button>
 
-                        <h3 className="font-semibold text-lg mb-2">{d.name}</h3>
-                        <p className="text-sm text-gray-600">ID: {d.id}</p>
-                    </div>
-                ))}
+                            {IconComponent && (
+                                <IconComponent className="text-blue-500 mb-2" size={26} />
+                            )}
+
+                            <h3 className="font-semibold text-lg mb-2">{d.name}</h3>
+                            {/*<p className="text-sm text-gray-600">ID: {d.id}</p>*/}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
