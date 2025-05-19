@@ -146,11 +146,13 @@ export default function CanvasEditor() {
 
     return (
         <div className="flex h-screen">
-            <TopMenu onSave={handleSave} onExport={handleExport} onUndo={handleUndo} onRedo={handleRedo} />
-            <SidebarPanel canvas={canvas} onSave={handleSave} />
+            <div className="flex flex-col">
+                <TopMenu onSave={handleSave} onExport={handleExport} onUndo={handleUndo} onRedo={handleRedo} />
+                <SidebarPanel canvas={canvas} onSave={handleSave} />
+            </div>
             <LayerPanel canvas={canvas} />
-            <div className="absolute" style={{ top: '52%', left: '65%', transform: 'translate(-50%, -50%)', }}>
-                <canvas ref={canvasRef} className="border-[0.5px] border-black-300 rounded-sm shadow-sm" />
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <canvas ref={canvasRef} className="border border-black rounded-sm shadow-sm" />
             </div>
         </div >
     );

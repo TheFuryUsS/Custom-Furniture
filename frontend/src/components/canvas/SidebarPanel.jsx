@@ -128,10 +128,10 @@ export default function SidebarPanel({ canvas, onSave }) {
     };
 
     return (
-        <div className="absolute top-20 left-4 z-50 flex flex-col items-center gap-2 bg-white border border-gray-200 rounded-md p-2 shadow-sm">
+        <div className="mt-4 w-14 bg-white border-r border-gray-200 p-2 shadow-md flex flex-col items-center gap-2">
 
             {/* TOOLS */}
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-col gap-2">
                 <button onClick={setDrawingMode} title="Dibuix_lliure" className={`p-2 rounded-md transition-colors duration-100 ${isDrawing ? 'bg-blue-100' : 'hover:bg-gray-200'}`}>
                     <Pencil className={`w-5 h-5 ${isDrawing ? 'text-blue-600' : 'text-gray-700'}`} />
                 </button>
@@ -152,39 +152,33 @@ export default function SidebarPanel({ canvas, onSave }) {
                 </button>
             </div>
 
-            <div className="w-full h-px bg-gray-300 my-1" />
+            <div className="w-full h-px bg-gray-300 my-2" />
 
             {/* IMATGE */}
-            <div className="w-full">
-                <div className="flex items-center gap-2">
-                    <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                        <ImageIcon className="w-5 h-5 text-gray-700" />
-                        <input type="file" accept="image/*" onChange={addImage} className="hidden" />
-                    </label>
-                </div>
-            </div>
+            <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                <ImageIcon className="w-5 h-5 text-gray-700" />
+                <input type="file" accept="image/*" onChange={addImage} className="hidden" />
+            </label>
 
-            <div className="w-full h-px bg-gray-300 my-1" />
+            <div className="w-full h-px bg-gray-300 my-2" />
 
             {/* COLORPICKER */}
-            <div className="w-full">
-                <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => {
-                        setColor(e.target.value)
-                        if (canvas?.freeDrawingBrush) {
-                            canvas.freeDrawingBrush.color = e.target.value;
-                        }
-                    }}
-                    className="w-full h-10 rounded-md border border-gray-300"
-                />
-            </div>
+            <input
+                type="color"
+                value={color}
+                onChange={(e) => {
+                    setColor(e.target.value)
+                    if (canvas?.freeDrawingBrush) {
+                        canvas.freeDrawingBrush.color = e.target.value;
+                    }
+                }}
+                className="w-10 h-10 rounded-md border border-gray-300"
+            />
 
-            <div className="w-full h-px bg-gray-300 my-1" />
+            <div className="w-full h-px bg-gray-300 my-2" />
 
             {/* DELETE */}
-            <button onClick={deleteObject} title="Esborra" className="p-2 bg-red-100 hover:bg-red-200 rounded-md transition-colors duration-100">
+            <button onClick={deleteObject} title="Esborra" className="p-2 bg-red-10 hover:bg-red-200 rounded-md transition-colors duration-100">
                 <Trash className="w-5 h-5 text-red-600" />
             </button>
         </div>
