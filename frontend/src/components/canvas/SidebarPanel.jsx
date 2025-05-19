@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import * as fabric from 'fabric';
-import { Pencil, Square, Circle, Triangle, Text, LineChart, Image as ImageIcon, Trash } from 'lucide-react';
+import { Pencil, Square, Circle, Triangle, Type, LineChart, Image as ImageIcon, Trash } from 'lucide-react';
 
 export default function SidebarPanel({ canvas, onSave }) {
     const [color, setColor] = useState('#000000');
+    const [isDrawing, setIsDrawing] = useState(false);
+
 
     const setDrawingMode = () => {
         if (!canvas) return;
         canvas.isDrawingMode = !canvas.isDrawingMode;
+        setIsDrawing(canvas.isDrawingMode)
         if (!canvas.freeDrawingBrush) {
             canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
         }
@@ -53,6 +56,7 @@ export default function SidebarPanel({ canvas, onSave }) {
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.isDrawingMode = false;
+                setIsDrawing(false);
                 canvas.requestRenderAll();
             } catch (error) {
                 console.error('Error carregant imatge:', error);
@@ -115,6 +119,7 @@ export default function SidebarPanel({ canvas, onSave }) {
 
         centerObject(shape);
         canvas.isDrawingMode = false;
+        setIsDrawing(false);
     };
 
     const deleteObject = () => {
@@ -124,27 +129,11 @@ export default function SidebarPanel({ canvas, onSave }) {
 
     return (
         <div className="absolute top-20 left-4 z-50 flex flex-col items-center gap-2 bg-white border border-gray-200 rounded-md p-2 shadow-sm">
-            {/* COLORPICKER */}
-            <div className="w-full">
-                <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => {
-                        setColor(e.target.value)
-                        if (canvas?.freeDrawingBrush) {
-                            canvas.freeDrawingBrush.color = e.target.value;
-                        }
-                    }}
-                    className="w-full h-10 rounded-md border border-gray-300"
-                />
-            </div>
-
-            <div className="w-full h-px bg-gray-300 my-1" />
 
             {/* TOOLS */}
             <div className="flex flex-wrap gap-1">
-                <button onClick={setDrawingMode} title="Dibuix" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <Pencil className="w-5 h-5 text-gray-700" />
+                <button onClick={setDrawingMode} title="Dibuix_lliure" className={`p-2 rounded-md transition-colors duration-100 ${isDrawing ? 'bg-blue-100' : 'hover:bg-gray-200'}`}>
+                    <Pencil className={`w-5 h-5 ${isDrawing ? 'text-blue-600' : 'text-gray-700'}`} />
                 </button>
                 <button onClick={() => addShape('rect')} title="Quadrat" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
                     <Square className="w-5 h-5 text-gray-700" />
@@ -159,7 +148,7 @@ export default function SidebarPanel({ canvas, onSave }) {
                     <LineChart className="w-5 h-5 text-gray-700" />
                 </button>
                 <button onClick={() => addShape('text')} title="Text" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <Text className="w-5 h-5 text-gray-700" />
+                    <Type className="w-5 h-5 text-gray-700" />
                 </button>
             </div>
 
@@ -167,13 +156,29 @@ export default function SidebarPanel({ canvas, onSave }) {
 
             {/* IMATGE */}
             <div className="w-full">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">🖼️ Afegeix imatge</label>
                 <div className="flex items-center gap-2">
                     <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
                         <ImageIcon className="w-5 h-5 text-gray-700" />
                         <input type="file" accept="image/*" onChange={addImage} className="hidden" />
                     </label>
                 </div>
+            </div>
+
+            <div className="w-full h-px bg-gray-300 my-1" />
+
+            {/* COLORPICKER */}
+            <div className="w-full">
+                <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => {
+                        setColor(e.target.value)
+                        if (canvas?.freeDrawingBrush) {
+                            canvas.freeDrawingBrush.color = e.target.value;
+                        }
+                    }}
+                    className="w-full h-10 rounded-md border border-gray-300"
+                />
             </div>
 
             <div className="w-full h-px bg-gray-300 my-1" />
