@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import * as fabric from 'fabric';
+import { Pencil, Square, Circle, Triangle, Text, LineChart, Image as ImageIcon, Trash } from 'lucide-react';
 
 export default function SidebarPanel({ canvas, onSave }) {
     const [color, setColor] = useState('#000000');
 
     const setDrawingMode = () => {
         if (!canvas) return;
-        canvas.isDrawingMode = true;
+        canvas.isDrawingMode = !canvas.isDrawingMode;
+        if (!canvas.freeDrawingBrush) {
+            canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+        }
         canvas.freeDrawingBrush.color = color;
-        canvas.freeDrawingBrush.width = 50;
+        canvas.freeDrawingBrush.width = 5;
     };
 
     const centerObject = (object) => {
@@ -46,7 +50,6 @@ export default function SidebarPanel({ canvas, onSave }) {
                 img.top = canvasH / 2;
 
                 img.set({ src: dataURL }); // Guardat imatges
-
                 canvas.add(img);
                 canvas.setActiveObject(img);
                 canvas.isDrawingMode = false;
@@ -57,7 +60,7 @@ export default function SidebarPanel({ canvas, onSave }) {
         };
 
         reader.readAsDataURL(file);
-    };  
+    };
 
     const addShape = (type) => {
         if (!canvas) return;
@@ -115,38 +118,70 @@ export default function SidebarPanel({ canvas, onSave }) {
     };
 
     const deleteObject = () => {
-        const active = canvas?.getActiveObject();
+        const active = canvas.getActiveObject();
         if (active) canvas.remove(active);
     };
 
     return (
-        <div className="absolute left-4 top-20 bg-white shadow-xl rounded-2xl p-4 w-60 space-y-4 z-50 border border-gray-200">
-            <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">🎨 Color</label>
+        <div className="absolute top-20 left-4 z-50 flex flex-col items-center gap-2 bg-white border border-gray-200 rounded-md p-2 shadow-sm">
+            {/* COLORPICKER */}
+            <div className="w-full">
                 <input
                     type="color"
                     value={color}
-                    onChange={(e) => setColor(e.target.value)}
+                    onChange={(e) => {
+                        setColor(e.target.value)
+                        if (canvas?.freeDrawingBrush) {
+                            canvas.freeDrawingBrush.color = e.target.value;
+                        }
+                    }}
                     className="w-full h-10 rounded-md border border-gray-300"
                 />
             </div>
 
-            <button onClick={setDrawingMode} className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-md transition">🖍️ Llapis</button>
+            <div className="w-full h-px bg-gray-300 my-1" />
 
-            <button onClick={() => addShape('rect')} className="w-full bg-gray-100 hover:bg-gray-200 text-sm py-2 rounded-md">⬛ Quadrat</button>
-            <button onClick={() => addShape('circle')} className="w-full bg-gray-100 hover:bg-gray-200 text-sm py-2 rounded-md">⚪ Cercle</button>
-            <button onClick={() => addShape('triangle')} className="w-full bg-gray-100 hover:bg-gray-200 text-sm py-2 rounded-md">🔺 Triangle</button>
-            <button onClick={() => addShape('line')} className="w-full bg-gray-100 hover:bg-gray-200 text-sm py-2 rounded-md">📏 Línia</button>
-            <button onClick={() => addShape('text')} className="w-full bg-gray-100 hover:bg-gray-200 text-sm py-2 rounded-md">T Text</button>
-
-
-            <div className="pt-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">🖼️ Afegeix imatge</label>
-                <input type="file" accept="image/*" onChange={addImage} className="block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" />
+            {/* TOOLS */}
+            <div className="flex flex-wrap gap-1">
+                <button onClick={setDrawingMode} title="Dibuix" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <Pencil className="w-5 h-5 text-gray-700" />
+                </button>
+                <button onClick={() => addShape('rect')} title="Quadrat" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <Square className="w-5 h-5 text-gray-700" />
+                </button>
+                <button onClick={() => addShape('circle')} title="Cercle" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <Circle className="w-5 h-5 text-gray-700" />
+                </button>
+                <button onClick={() => addShape('triangle')} title="Triangle" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <Triangle className="w-5 h-5 text-gray-700" />
+                </button>
+                <button onClick={() => addShape('line')} title="Linia" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <LineChart className="w-5 h-5 text-gray-700" />
+                </button>
+                <button onClick={() => addShape('text')} title="Text" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <Text className="w-5 h-5 text-gray-700" />
+                </button>
             </div>
 
-            <button onClick={deleteObject} className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-md transition">Esborrar selecció</button>
-            <hr />
+            <div className="w-full h-px bg-gray-300 my-1" />
+
+            {/* IMATGE */}
+            <div className="w-full">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">🖼️ Afegeix imatge</label>
+                <div className="flex items-center gap-2">
+                    <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                        <ImageIcon className="w-5 h-5 text-gray-700" />
+                        <input type="file" accept="image/*" onChange={addImage} className="hidden" />
+                    </label>
+                </div>
+            </div>
+
+            <div className="w-full h-px bg-gray-300 my-1" />
+
+            {/* DELETE */}
+            <button onClick={deleteObject} title="Esborra" className="p-2 bg-red-100 hover:bg-red-200 rounded-md transition-colors duration-100">
+                <Trash className="w-5 h-5 text-red-600" />
+            </button>
         </div>
     );
 }

@@ -60,7 +60,7 @@ export default function EditorHeader() {
 
     return (
         <header className="bg-gray-100 border-b px-4 py-2 flex items-center space-x-4 shadow-sm">
-            {/* Logo */}
+            {/* LOGO */}
             <a href="/designs">
                 <img
                     src="/iconbo.png"
@@ -69,7 +69,7 @@ export default function EditorHeader() {
                 />
             </a>
 
-            {/* Nom */}
+            {/* NOM */}
             <input
                 type="text"
                 value={designName}
@@ -78,7 +78,8 @@ export default function EditorHeader() {
                 onKeyDown={handleKey}
                 className="text-lg font-medium bg-transparent focus:outline-none px-2 py-1 rounded transition
                 hover:ring-[0.5px] hover:ring-black/70
-                focus:ring-[0.5px] focus:ring-black/70"            />
+                focus:ring-[0.5px] focus:ring-black/70"
+            />
         </header>
     );
 }
