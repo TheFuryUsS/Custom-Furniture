@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import * as fabric from 'fabric';
-import { Pencil, Square, Circle, Triangle, Type, LineChart, Image as ImageIcon, Trash } from 'lucide-react';
+import { Pencil, Square, Circle, Triangle, Type, LineChart, ImagePlus as ImageIcon, Trash } from 'lucide-react';
 
 export default function SidebarPanel({ canvas, onSave }) {
     const [color, setColor] = useState('#000000');
