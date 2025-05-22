@@ -12,6 +12,8 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import MobileImageUpload from './pages/MobileImageUpload';
+
 
 function PrivateRoute({ children }) {
   const { token } = useContext(AuthContext);
@@ -37,6 +39,7 @@ export default function App() {
 
         <Route element={<PrivateRoute><EditorLayout /></PrivateRoute>}>
           <Route path="/editor/:id" element={<EditorPage />} />
+          <Route path="/upload/:designId" element={<MobileImageUpload />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

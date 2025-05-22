@@ -13,6 +13,7 @@ app.use(express.json());
 
 app.use('/api/users', userRoutes);
 app.use('/api/designs', designRoutes);
+app.use('/uploads', express.static('uploads'));
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Servidor funcionant al port ${PORT}`));

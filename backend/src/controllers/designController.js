@@ -1,4 +1,7 @@
 const pool = require('../config/db');
+const multer = require('multer');
+const path = require('path');
+const upload = multer({ dest: 'uploads/' });
 
 // Obtenir tots els dissenys de l'usuari
 exports.getAllDesigns = async (req, res) => {
@@ -93,5 +96,52 @@ exports.updateDesign = async (req, res) => {
     } catch (err) {
         console.error('Error actualitzant el disseny:', err);
         res.status(500).json({ error: 'Error al actualitzar el disseny' });
+    }
+};
+
+
+exports.uploadImage = async (req, res) => {
+    const userId = req.user.id;
+    const designId = req.params.id;
+
+    if (!req.file) {
+        return res.status(400).json({ error: 'Cap imatge rebuda' });
+    }
+
+    const imagePath = `/uploads/${req.file.filename}`;
+
+    try {
+        const result = await pool.query(`UPDATE designs
+            SET image_url = $1
+            WHERE id = $2 AND user_id = $3
+            RETURNING *`,
+            [imagePath, designId, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Disseny no trobat o no tens permisos' });
+        }
+
+        res.status(200).json({ message: 'Imatge pujada correctament', imageUrl: imagePath });
+    } catch (err) {
+        console.error('Error pujant la imatge:', err);
+        res.status(500).json({ error: 'Error al pujar la imatge' });
+    }
+};
+
+
+exports.deleteImage = async (req, res) => {
+    const userId = req.user.id;
+    const designId = req.params.id;
+
+    try {
+        await pool.query(
+            `UPDATE designs SET image_url = NULL WHERE id = $1 AND user_id = $2`,
+            [designId, userId]
+        );
+
+        res.status(200).json({ message: 'Imatge esborrada correctament' });
+    } catch (err) {
+        console.error('Error esborrant la imatge:', err);
+        res.status(500).json({ error: 'Error al esborrar la imatge' });
     }
 };

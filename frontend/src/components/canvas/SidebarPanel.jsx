@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
-import { Pencil, Square, Circle, Triangle, Type, LineChart, ImagePlus as ImageIcon, Trash } from 'lucide-react';
+import { Pencil, Square, Circle, Triangle, Type, Slash, ImagePlus as ImageIcon, QrCode, Trash } from 'lucide-react';
+//import { QRCode } from 'qrcode.react';
 
-export default function SidebarPanel({ canvas, onSave }) {
+
+export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) {
     const [color, setColor] = useState('#000000');
     const [isDrawing, setIsDrawing] = useState(false);
+    const navigate = useNavigate();
 
 
     const setDrawingMode = () => {
@@ -145,7 +149,7 @@ export default function SidebarPanel({ canvas, onSave }) {
                     <Triangle className="w-5 h-5 text-gray-700" />
                 </button>
                 <button onClick={() => addShape('line')} title="Linia" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <LineChart className="w-5 h-5 text-gray-700" />
+                    <Slash className="w-5 h-5 text-gray-700" />
                 </button>
                 <button onClick={() => addShape('text')} title="Text" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
                     <Type className="w-5 h-5 text-gray-700" />
@@ -154,11 +158,23 @@ export default function SidebarPanel({ canvas, onSave }) {
 
             <div className="w-full h-px bg-gray-300 my-2" />
 
-            {/* IMATGE */}
+            {/* IMATGE i IMATGEQR */}
             <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
                 <ImageIcon className="w-5 h-5 text-gray-700" />
                 <input type="file" accept="image/*" onChange={addImage} className="hidden" />
             </label>
+
+            <button
+                onClick={() => {
+                    onTriggerQr();
+                    //navigate(`/upload/${designId}`); // obre el QR
+                }}
+                title="Puja des de mòbil"
+                className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100"
+            >
+                <QrCode className="w-5 h-5 text-gray-700" />
+            </button>
+
 
             <div className="w-full h-px bg-gray-300 my-2" />
 

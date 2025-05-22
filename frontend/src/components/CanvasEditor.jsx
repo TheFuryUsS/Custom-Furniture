@@ -9,6 +9,7 @@ import LayerPanel from './canvas/LayerPanel';
 export default function CanvasEditor() {
     const canvasRef = useRef(null);
     const [canvas, setCanvas] = useState(null);
+    const [waitingForQrImage, setWaitingForQrImage] = useState(false);
     const { id } = useParams();
 
     const isInitializingRef = useRef(false);
@@ -77,7 +78,6 @@ export default function CanvasEditor() {
     useEffect(() => {
         if (!canvas) return;
         isInitializingRef.current = true;
-
 
         api.get(`/designs/${id}`)
             .then(res => {
@@ -148,6 +148,51 @@ export default function CanvasEditor() {
             });
     }, [canvas, id]);
 
+    useEffect(() => {
+        if (!waitingForQrImage || !canvas) return;
+
+        const interval = setInterval(async () => {
+            try {
+                console.log("ID:", id);
+                const res = await api.get(`/designs/${id}`);
+                const imageUrl = res.data?.image_url;
+                const fullImageUrl = `http://localhost:3000${imageUrl}`;
+                console.log("URL:", fullImageUrl);
+
+                if (fullImageUrl) {
+                    const img = await fabric.Image.fromURL(fullImageUrl);
+
+                    const canvasW = canvas.getWidth();
+                    const canvasH = canvas.getHeight();
+
+                    img.scaleX = canvasW / img.width;
+                    img.scaleY = canvasH / img.height;
+
+                    img.originX = 'center';
+                    img.originY = 'center';
+                    img.left = canvasW / 2;
+                    img.top = canvasH / 2;
+
+                    img.set({ src: fullImageUrl }); // Guardat imatges
+                    canvas.add(img);
+                    canvas.setActiveObject(img);
+                    canvas.requestRenderAll();
+
+                    await api.delete(`/designs/${id}/image`);
+
+                    clearInterval(interval);
+                    setWaitingForQrImage(false);
+                }
+            } catch (error) {
+                console.error('Error comprovant imatge pujada:', error);
+            }
+        }, 2000);
+
+        return () => {
+            clearInterval(interval);
+        }
+    }, [waitingForQrImage, canvas, id]);
+
 
     const handleSave = async () => {
         if (!canvas) return;
@@ -196,7 +241,7 @@ export default function CanvasEditor() {
         <div className="flex h-screen">
             <div className="flex flex-col">
                 <TopMenu onSave={handleSave} onExport={handleExport} onUndo={handleUndo} onRedo={handleRedo} />
-                <SidebarPanel canvas={canvas} onSave={handleSave} />
+                <SidebarPanel canvas={canvas} onSave={handleSave} designId={id} onTriggerQr={() => setWaitingForQrImage(true)} />
             </div>
             <LayerPanel canvas={canvas} />
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
