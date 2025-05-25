@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
-import { Pencil, Square, Circle, Triangle, Type, Slash, ImagePlus as ImageIcon, QrCode, Trash } from 'lucide-react';
-//import { QRCode } from 'qrcode.react';
-
+import { Pencil, Square, Circle, Triangle, Type, Slash, ImagePlus as ImageIcon, QrCode as QrCodeIcon, Trash, X } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) {
     const [color, setColor] = useState('#000000');
     const [isDrawing, setIsDrawing] = useState(false);
+    const [showQr, setShowQr] = useState(false);
     const navigate = useNavigate();
 
 
@@ -131,72 +131,105 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
         if (active) canvas.remove(active);
     };
 
-    return (
-        <div className="mt-4 w-14 bg-white border-r border-gray-200 p-2 shadow-md flex flex-col items-center gap-2">
+    const handleColorChange = (e) => {
+        const newColor = e.target.value;
+        setColor(newColor);
 
-            {/* TOOLS */}
-            <div className="flex flex-col gap-2">
-                <button onClick={setDrawingMode} title="Dibuix_lliure" className={`p-2 rounded-md transition-colors duration-100 ${isDrawing ? 'bg-blue-100' : 'hover:bg-gray-200'}`}>
-                    <Pencil className={`w-5 h-5 ${isDrawing ? 'text-blue-600' : 'text-gray-700'}`} />
+        if (!canvas) return;
+
+        const activeObject = canvas.getActiveObject();
+
+        if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+            canvas.freeDrawingBrush.color = newColor;
+        } else if (activeObject) {
+            if (activeObject.type === 'text') {
+                activeObject.set({ fill: newColor });
+            } else {
+                activeObject.set({ fill: newColor, stroke: newColor });
+            }
+            canvas.requestRenderAll();
+        }
+    };
+
+    return (
+        <>
+            <div className="mt-4 w-14 bg-white border-r border-gray-200 p-2 shadow-md flex flex-col items-center gap-2">
+
+                {/* TOOLS */}
+                <div className="flex flex-col gap-2">
+                    <button onClick={setDrawingMode} title="Pinzell" className={`p-2 rounded-md transition-colors duration-100 ${isDrawing ? 'bg-blue-100' : 'hover:bg-gray-200'}`}>
+                        <Pencil className={`w-5 h-5 ${isDrawing ? 'text-blue-600' : 'text-gray-700'}`} />
+                    </button>
+                    <button onClick={() => addShape('rect')} title="Quadrat" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                        <Square className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <button onClick={() => addShape('circle')} title="Cercle" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                        <Circle className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <button onClick={() => addShape('triangle')} title="Triangle" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                        <Triangle className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <button onClick={() => addShape('line')} title="Linia" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                        <Slash className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <button onClick={() => addShape('text')} title="Text" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                        <Type className="w-5 h-5 text-gray-700" />
+                    </button>
+                </div>
+
+                <div className="w-full h-px bg-gray-300 my-2" />
+
+                {/* IMATGE i IMATGEQR */}
+                <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <ImageIcon className="w-5 h-5 text-gray-700" />
+                    <input type="file" accept="image/*" onChange={addImage} className="hidden" />
+                </label>
+
+                <button
+                    onClick={() => {
+                        onTriggerQr()
+                        setShowQr(true)
+                    }}
+                    title="Puja des de mòbil" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                    <QrCodeIcon className="w-5 h-5 text-gray-700" />
                 </button>
-                <button onClick={() => addShape('rect')} title="Quadrat" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <Square className="w-5 h-5 text-gray-700" />
-                </button>
-                <button onClick={() => addShape('circle')} title="Cercle" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <Circle className="w-5 h-5 text-gray-700" />
-                </button>
-                <button onClick={() => addShape('triangle')} title="Triangle" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <Triangle className="w-5 h-5 text-gray-700" />
-                </button>
-                <button onClick={() => addShape('line')} title="Linia" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <Slash className="w-5 h-5 text-gray-700" />
-                </button>
-                <button onClick={() => addShape('text')} title="Text" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                    <Type className="w-5 h-5 text-gray-700" />
+
+
+                <div className="w-full h-px bg-gray-300 my-2" />
+
+                {/* COLORPICKER */}
+                <input
+                    type="color"
+                    value={color}
+                    onChange={handleColorChange}
+                    className="w-10 h-10 rounded-md border border-gray-300"
+                />
+
+                <div className="w-full h-px bg-gray-300 my-2" />
+
+                {/* DELETE */}
+                <button onClick={deleteObject} title="Esborra" className="p-2 bg-red-10 hover:bg-red-200 rounded-md transition-colors duration-100">
+                    <Trash className="w-5 h-5 text-red-600" />
                 </button>
             </div>
 
-            <div className="w-full h-px bg-gray-300 my-2" />
 
-            {/* IMATGE i IMATGEQR */}
-            <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
-                <ImageIcon className="w-5 h-5 text-gray-700" />
-                <input type="file" accept="image/*" onChange={addImage} className="hidden" />
-            </label>
-
-            <button
-                onClick={() => {
-                    onTriggerQr();
-                    //navigate(`/upload/${designId}`); // obre el QR
-                }}
-                title="Puja des de mòbil"
-                className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100"
-            >
-                <QrCode className="w-5 h-5 text-gray-700" />
-            </button>
-
-
-            <div className="w-full h-px bg-gray-300 my-2" />
-
-            {/* COLORPICKER */}
-            <input
-                type="color"
-                value={color}
-                onChange={(e) => {
-                    setColor(e.target.value)
-                    if (canvas?.freeDrawingBrush) {
-                        canvas.freeDrawingBrush.color = e.target.value;
-                    }
-                }}
-                className="w-10 h-10 rounded-md border border-gray-300"
-            />
-
-            <div className="w-full h-px bg-gray-300 my-2" />
-
-            {/* DELETE */}
-            <button onClick={deleteObject} title="Esborra" className="p-2 bg-red-10 hover:bg-red-200 rounded-md transition-colors duration-100">
-                <Trash className="w-5 h-5 text-red-600" />
-            </button>
-        </div>
+            {/* POPUP QR */}
+            {showQr && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg text-center relative w-80">
+                        <button onClick={() => setShowQr(false)} className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition" title="Tancar">
+                            <X className="h-5 w-5 text-gray-500 hover:text-gray-800 transition" />
+                        </button>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center leading-snug">
+                            Penja una imatge des del mòbil escanejant aquest QR!
+                        </h2>
+                        <div className="flex justify-center items-center">
+                            <QRCodeSVG value={`${window.location.origin}/upload/${designId}`} size={200} />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }

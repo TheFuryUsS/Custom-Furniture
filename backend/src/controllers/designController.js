@@ -100,6 +100,7 @@ exports.updateDesign = async (req, res) => {
 };
 
 
+// Actualitzar imatge disseny
 exports.uploadImage = async (req, res) => {
     const userId = req.user.id;
     const designId = req.params.id;
@@ -129,6 +130,7 @@ exports.uploadImage = async (req, res) => {
 };
 
 
+// Esborrar imatge disseny
 exports.deleteImage = async (req, res) => {
     const userId = req.user.id;
     const designId = req.params.id;

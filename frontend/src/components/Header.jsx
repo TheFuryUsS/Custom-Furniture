@@ -22,10 +22,10 @@ export default function Header() {
             {token && (
                 <nav className="flex items-center space-x-6 text-sm">
                     <Link to="/designs" className="relative text-gray-700 hover:text-blue-600 transition duration-200 group">
-                        <span className="group-hover:border-blue-600 pb-1 border-b-2 border-transparent transition-all duration-300">Dissenys</span>
+                        <span className="group-hover:border-blue-600 pb-1 border-b-2 border-transparent transition-all duration-200">Dissenys</span>
                     </Link>
                     <Link to="/profile" className="relative text-gray-700 hover:text-blue-600 transition duration-200 group">
-                        <span className="group-hover:border-blue-600 pb-1 border-b-2 border-transparent transition-all duration-300">Perfil</span>
+                        <span className="group-hover:border-blue-600 pb-1 border-b-2 border-transparent transition-all duration-200">Perfil</span>
                     </Link>
 
                     {/* Lletra usuari */}
@@ -36,8 +36,8 @@ export default function Header() {
                     )}
 
                     {/* Logout */}
-                    <button onClick={handleLogout} className="relative text-red-500 hover:text-red-600 transition duration-200 group">
-                        <span className="group-hover:border-red-500 pb-1 border-b-2 border-transparent transition-all duration-300">Log Out</span>
+                    <button onClick={handleLogout} className="relative text-red-500 hover:text-red-700 transition duration-200 group">
+                        <span className="group-hover:border-red-700 pb-1 border-b-2 border-transparent transition-all duration-200">Log Out</span>
                     </button>
                 </nav>
             )}

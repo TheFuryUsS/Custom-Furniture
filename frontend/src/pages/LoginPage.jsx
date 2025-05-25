@@ -33,13 +33,13 @@ export default function LoginPage() {
 
             <input className="w-full p-2 border mb-4" placeholder="Username o email" value={username_or_email} onChange={e => setUsernameOrEmail(e.target.value)}/>
             <input type="password" className="w-full p-2 border mb-4" placeholder="Contrasenya" value={password} onChange={e => setPassword(e.target.value)}/>
-            <button type="submit" className="w-full p-2 bg-blue-600 text-white">
+            <button type="submit" className="w-full p-2 bg-blue-600 hover:bg-blue-900 rounded-md transition-colors duration-100 text-white">
                 Entrar
             </button>
 
             <div>
                 <p className="mt-4 text-center">
-                    Encara no tens un compte? <a href="/register" className="text-blue-600 underline">Registra't aquí</a>
+                    Encara no tens un compte? <a href="/register" className="text-blue-600 hover:text-blue-900 hover:underline">Registra't aquí</a>
                 </p>
             </div>
         </form>

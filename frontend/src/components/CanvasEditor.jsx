@@ -148,6 +148,8 @@ export default function CanvasEditor() {
             });
     }, [canvas, id]);
 
+
+    // useEffect per quan arriba l'imatge del QR, inserir-la automàticament
     useEffect(() => {
         if (!waitingForQrImage || !canvas) return;
 

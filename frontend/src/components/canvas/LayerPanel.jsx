@@ -1,57 +1,176 @@
 import React, { useEffect, useState } from 'react';
+import {
+    Eye, EyeOff, Lock, Unlock, Trash,
+    ArrowUp, ArrowDown
+} from 'lucide-react';
 
 export default function LayerPanel({ canvas }) {
     const [objects, setObjects] = useState([]);
+    const [editingId, setEditingId] = useState(null);
+    const [nameInput, setNameInput] = useState('');
+    const [activeObject, setActiveObject] = useState(null);
 
     useEffect(() => {
         if (!canvas) return;
 
-        const update = () => {
-            const objs = canvas.getObjects().map((obj, index) => ({
+        const handleUpdate = () => {
+            refreshObjects();
+            setActiveObject(canvas.getActiveObject());
+        };
+
+        refreshObjects();
+        canvas.on('object:added', handleUpdate);
+        canvas.on('object:removed', handleUpdate);
+        canvas.on('object:modified', handleUpdate);
+        canvas.on('selection:cleared', () => setActiveObject(null));
+        canvas.on('selection:updated', () => setActiveObject(canvas.getActiveObject()));
+        canvas.on('selection:created', () => setActiveObject(canvas.getActiveObject()));
+
+        return () => {
+            canvas.off('object:added', handleUpdate);
+            canvas.off('object:removed', handleUpdate);
+            canvas.off('object:modified', handleUpdate);
+            canvas.off('selection:cleared');
+            canvas.off('selection:updated');
+            canvas.off('selection:created');
+        };
+    }, [canvas]);
+
+    const refreshObjects = () => {
+        const objs = canvas.getObjects()
+            .filter(obj => obj)
+            .map((obj, index) => ({
                 id: obj.id || index,
                 type: obj.type,
                 obj,
+                name: obj.layerName || `${obj.type.charAt(0).toUpperCase() + obj.type.slice(1)}`
             }));
-            setObjects(objs);
-        };
 
-        update();
-        canvas.on('object:added', update);
-        canvas.on('object:removed', update);
-        canvas.on('object:modified', update);
-
-        return () => {
-            canvas.off('object:added', update);
-            canvas.off('object:removed', update);
-            canvas.off('object:modified', update);
-        };
-    }, [canvas]);
+        setObjects(objs.reverse());
+    };
 
     const selectObject = (obj) => {
         canvas.setActiveObject(obj);
         canvas.requestRenderAll();
+        setActiveObject(obj);
     };
 
     const deleteObject = (obj) => {
         canvas.remove(obj);
         canvas.discardActiveObject();
         canvas.requestRenderAll();
+        setActiveObject(null);
+    };
+
+    const toggleVisibility = (obj) => {
+        obj.visible = !obj.visible;
+        canvas.requestRenderAll();
+        refreshObjects();
+    };
+
+    const toggleLock = (obj) => {
+        obj.selectable = !obj.selectable;
+        obj.evented = obj.selectable;
+        canvas.requestRenderAll();
+        refreshObjects();
+    };
+
+    const moveLayer = (obj, direction) => {
+        const objects = canvas.getObjects();
+        const index = objects.indexOf(obj);
+        if (index === -1) return;
+
+        if (direction === 'up' && index < objects.length - 1) {
+            obj.moveTo(index + 1);
+        }
+        if (direction === 'down' && index > 0) {
+            obj.moveTo(index - 1);
+        }
+
+        canvas.requestRenderAll();
+        refreshObjects();
+    };
+
+    const startEditing = (id, currentName) => {
+        setEditingId(id);
+        setNameInput(currentName);
+    };
+
+    const saveName = (item) => {
+        item.obj.layerName = nameInput.trim() || item.name;
+        canvas.requestRenderAll();
+        setEditingId(null);
+        refreshObjects();
     };
 
     return (
-        <div className="mt-4">
-            <h3 className="font-semibold text-sm mb-1">Capes</h3>
+        <div className="absolute mt-4 right-4 z-50 w-72 max-h-[75vh] overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md p-2">
+            <h3 className="font-semibold text-sm mb-2 px-1">Capes</h3>
             <ul className="space-y-1 text-sm">
-                {objects.map((item, i) => (
-                    <li key={i} className="flex items-center justify-between bg-gray-50 p-1 rounded hover:bg-gray-100 transition cursor-pointer">
-                        <span onClick={() => selectObject(item.obj)} className="flex-1 truncate">
-                            {item.type.charAt(0).toUpperCase() + item.type.slice(1)} #{i + 1}
-                        </span>
-                        <button onClick={() => deleteObject(item.obj)} className="text-red-500 hover:text-red-700 px-1">
-                            ✕
-                        </button>
-                    </li>
-                ))}
+                {objects
+                    .filter(item => item && item.obj)
+                    .map((item, i) => {
+                        const isSelected = activeObject === item.obj;
+                        return (
+                            <li
+                                key={i}
+                                onClick={() => selectObject(item.obj)}
+                                onDoubleClick={() => startEditing(item.id, item.obj.layerName || item.name)}
+                                className={`flex items-center justify-between p-2 rounded transition cursor-pointer
+                                    ${!item.obj.visible ? 'opacity-50' : ''}
+                                    ${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+                            >
+                                <div className="flex-1">
+                                    {editingId === item.id ? (
+                                        <input
+                                            autoFocus
+                                            value={nameInput}
+                                            onChange={(e) => setNameInput(e.target.value)}
+                                            onBlur={() => saveName(item)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') saveName(item);
+                                                if (e.key === 'Escape') setEditingId(null);
+                                            }}
+                                            className="w-full text-sm px-1 py-0.5 border rounded focus:outline-none"
+                                        />
+                                    ) : (
+                                        <span
+                                            className="truncate text-gray-800"
+                                            title="Fes doble clic per editar"
+                                        >
+                                            {item.obj.layerName || `${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`}
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center space-x-1 ml-2">
+                                    <button onClick={(e) => { e.stopPropagation(); moveLayer(item.obj, 'up'); }} title="Puja" className="p-1 hover:bg-gray-200 rounded">
+                                        <ArrowUp className="w-4 h-4 text-gray-600" />
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); moveLayer(item.obj, 'down'); }} title="Baixa" className="p-1 hover:bg-gray-200 rounded">
+                                        <ArrowDown className="w-4 h-4 text-gray-600" />
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); toggleVisibility(item.obj); }} title="Mostra/Amaga" className="p-1 hover:bg-gray-200 rounded">
+                                        {item.obj.visible ? (
+                                            <Eye className="w-4 h-4 text-gray-600" />
+                                        ) : (
+                                            <EyeOff className="w-4 h-4 text-gray-600" />
+                                        )}
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); toggleLock(item.obj); }} title="Bloqueja/Desbloqueja" className="p-1 hover:bg-gray-200 rounded">
+                                        {item.obj.selectable ? (
+                                            <Unlock className="w-4 h-4 text-gray-600" />
+                                        ) : (
+                                            <Lock className="w-4 h-4 text-gray-600" />
+                                        )}
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); deleteObject(item.obj); }} title="Esborra" className="p-1 hover:bg-red-100 rounded">
+                                        <Trash className="w-4 h-4 text-red-500" />
+                                    </button>
+                                </div>
+                            </li>
+                        );
+                    })}
             </ul>
         </div>
     );
