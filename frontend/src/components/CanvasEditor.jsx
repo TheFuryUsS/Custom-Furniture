@@ -167,13 +167,15 @@ export default function CanvasEditor() {
                     const canvasW = canvas.getWidth();
                     const canvasH = canvas.getHeight();
 
-                    img.scaleX = canvasW / img.width;
-                    img.scaleY = canvasH / img.height;
+                    const maxWidth = 150;
+                    const scaleFactor = maxWidth / img.width;
+
+                    img.scale(scaleFactor);
 
                     img.originX = 'center';
                     img.originY = 'center';
-                    img.left = canvasW / 2;
-                    img.top = canvasH / 2;
+                    img.left = canvas.getWidth() / 2;
+                    img.top = canvas.getHeight() / 2;
 
                     img.set({ src: fullImageUrl }); // Guardat imatges
                     canvas.add(img);

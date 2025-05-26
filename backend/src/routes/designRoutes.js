@@ -19,6 +19,8 @@ router.put('/:id', authenticate, designController.updateDesign);
 
 router.post('/:id/upload-image', authenticate, upload.single('image'), designController.uploadImage);
 
+router.post('/:id/upload-image-direct', authenticate, upload.single('image'), designController.uploadImageDirect);
+
 router.delete('/:id/image', authenticate, designController.deleteImage);
 
 

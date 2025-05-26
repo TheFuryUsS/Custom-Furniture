@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
 import { Pencil, Square, Circle, Triangle, Type, Slash, ImagePlus as ImageIcon, QrCode as QrCodeIcon, Trash, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import api from '../../lib/api';
 
 export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) {
     const [color, setColor] = useState('#000000');
@@ -38,36 +39,41 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
         const file = e.target.files[0];
         if (!file || !canvas) return;
 
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const dataURL = reader.result;
+        const formData = new FormData();
+        formData.append('image', file);
 
-            try {
-                const img = await fabric.Image.fromURL(dataURL);
+        try {
+            const uploadRes = await api.post(`/designs/${designId}/upload-image-direct`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            const imageUrl = uploadRes.data.imageUrl;
+            console.log(imageUrl)
+            const fullImageUrl = `http://localhost:3000${imageUrl}`;
 
-                const canvasW = canvas.getWidth();
-                const canvasH = canvas.getHeight();
+            const img = await fabric.Image.fromURL(fullImageUrl);
 
-                img.scaleX = canvasW / img.width;
-                img.scaleY = canvasH / img.height;
 
-                img.originX = 'center';
-                img.originY = 'center';
-                img.left = canvasW / 2;
-                img.top = canvasH / 2;
+            const maxWidth = 150;
+            const scaleFactor = maxWidth / img.width;
 
-                img.set({ src: dataURL }); // Guardat imatges
-                canvas.add(img);
-                canvas.setActiveObject(img);
-                canvas.isDrawingMode = false;
-                setIsDrawing(false);
-                canvas.requestRenderAll();
-            } catch (error) {
-                console.error('Error carregant imatge:', error);
-            }
-        };
+            img.scale(scaleFactor);
 
-        reader.readAsDataURL(file);
+            img.originX = 'center';
+            img.originY = 'center';
+            img.left = canvas.getWidth() / 2;
+            img.top = canvas.getHeight() / 2;
+
+            img.set({ src: imageUrl }); // Guardat imatges
+            canvas.add(img);
+            canvas.setActiveObject(img);
+            canvas.isDrawingMode = false;
+            setIsDrawing(false);
+            canvas.requestRenderAll();
+        } catch (error) {
+            console.error('Error carregant imatge:', error);
+        }
     };
 
     const addShape = (type) => {

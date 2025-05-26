@@ -100,7 +100,7 @@ exports.updateDesign = async (req, res) => {
 };
 
 
-// Actualitzar imatge disseny
+// Pujar imatge disseny (des de QR)
 exports.uploadImage = async (req, res) => {
     const userId = req.user.id;
     const designId = req.params.id;
@@ -127,6 +127,21 @@ exports.uploadImage = async (req, res) => {
         console.error('Error pujant la imatge:', err);
         res.status(500).json({ error: 'Error al pujar la imatge' });
     }
+};
+
+
+// Pujar imatge disseny
+exports.uploadImageDirect = async (req, res) => {
+    const userId = req.user.id;
+    const designId = req.params.id;
+
+    if (!req.file) {
+        return res.status(400).json({ error: 'Cap imatge rebuda' });
+    }
+
+    const imagePath = `/uploads/${req.file.filename}`;
+
+    res.status(200).json({ message: 'Imatge pujada directament correctament', imageUrl: imagePath });
 };
 
 

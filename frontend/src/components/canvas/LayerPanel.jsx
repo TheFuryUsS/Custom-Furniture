@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Eye, EyeOff, Lock, Unlock, Trash,
-    ArrowUp, ArrowDown
-} from 'lucide-react';
+import { Eye, EyeOff, Lock, Unlock, ArrowUp, ArrowDown, Pencil, Square, Circle, Triangle, Type, Slash, ImagePlus as ImageIcon, QrCode as QrCodeIcon, Trash, X } from 'lucide-react';
 
 export default function LayerPanel({ canvas }) {
     const [objects, setObjects] = useState([]);
@@ -103,6 +100,29 @@ export default function LayerPanel({ canvas }) {
         refreshObjects();
     };
 
+    const getLayerIcon = (type) => {
+        switch (type) {
+            case 'path':
+                return <Pencil className="w-4 h-4 text-gray-500 mr-2" />;
+            case 'rect':
+                return <Square className="w-4 h-4 text-gray-500 mr-2" />;
+            case 'circle':
+                return <Circle className="w-4 h-4 text-gray-500 mr-2" />;
+            case 'triangle':
+                return <Triangle className="w-4 h-4 text-gray-500 mr-2" />;
+            case 'line':
+                return <Slash className="w-4 h-4 text-gray-500 mr-2" />;
+            case 'i-text':
+            case 'textbox':
+                return <Type className="w-4 h-4 text-gray-500 mr-2" />;
+            case 'image':
+                return <ImageIcon className="w-4 h-4 text-gray-500 mr-2" />;
+            default:
+                return null;
+        }
+    };
+
+
     return (
         <div className="absolute mt-4 right-4 z-50 w-72 max-h-[75vh] overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md p-2">
             <h3 className="font-semibold text-sm mb-2 px-1">Capes</h3>
@@ -112,21 +132,10 @@ export default function LayerPanel({ canvas }) {
                     .map((item, i) => {
                         const isSelected = activeObject === item.obj;
                         return (
-                            <li
-                                key={i}
-                                onClick={() => selectObject(item.obj)}
-                                onDoubleClick={() => startEditing(item.id, item.obj.layerName || item.name)}
-                                className={`flex items-center justify-between p-2 rounded transition cursor-pointer
-                                    ${!item.obj.visible ? 'opacity-50' : ''}
-                                    ${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-                            >
+                            <li key={i} onClick={() => selectObject(item.obj)} onDoubleClick={() => startEditing(item.id, item.obj.layerName || item.name)} className={`flex items-center justify-between p-2 rounded transition cursor-pointer ${!item.obj.visible ? 'opacity-50' : ''} ${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'}`}>
                                 <div className="flex-1">
                                     {editingId === item.id ? (
-                                        <input
-                                            autoFocus
-                                            value={nameInput}
-                                            onChange={(e) => setNameInput(e.target.value)}
-                                            onBlur={() => saveName(item)}
+                                        <input autoFocus value={nameInput} onChange={(e) => setNameInput(e.target.value)} onBlur={() => saveName(item)}
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') saveName(item);
                                                 if (e.key === 'Escape') setEditingId(null);
@@ -134,12 +143,12 @@ export default function LayerPanel({ canvas }) {
                                             className="w-full text-sm px-1 py-0.5 border rounded focus:outline-none"
                                         />
                                     ) : (
-                                        <span
-                                            className="truncate text-gray-800"
-                                            title="Fes doble clic per editar"
-                                        >
-                                            {item.obj.layerName || `${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`}
-                                        </span>
+                                        <div className="flex items-center">
+                                            {getLayerIcon(item.type)}
+                                            <span className="truncate text-gray-800" title="Fes doble clic per editar">
+                                                {item.obj.layerName || `${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
 
