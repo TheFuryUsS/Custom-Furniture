@@ -50,6 +50,7 @@ export default function LayerPanel({ canvas }) {
         canvas.setActiveObject(obj);
         canvas.requestRenderAll();
         setActiveObject(obj);
+        console.log('zIndex:', canvas.getObjects().indexOf(obj));
     };
 
     const deleteObject = (obj) => {
@@ -75,18 +76,26 @@ export default function LayerPanel({ canvas }) {
     const moveLayer = (obj, direction) => {
         const objects = canvas.getObjects();
         const index = objects.indexOf(obj);
-        if (index === -1) return;
+        let newIndex = index;
 
         if (direction === 'up' && index < objects.length - 1) {
-            obj.moveTo(index + 1);
-        }
-        if (direction === 'down' && index > 0) {
-            obj.moveTo(index - 1);
+            newIndex = index + 1;
+        } else if (direction === 'down' && index > 0) {
+            newIndex = index - 1;
+        } else {
+            return;
         }
 
-        canvas.requestRenderAll();
+        objects.splice(index, 1);
+        objects.splice(newIndex, 0, obj);
+
+        canvas._objects = objects;
+
+        canvas.renderAll();
         refreshObjects();
     };
+
+
 
     const startEditing = (id, currentName) => {
         setEditingId(id);
@@ -153,20 +162,20 @@ export default function LayerPanel({ canvas }) {
                                 </div>
 
                                 <div className="flex items-center space-x-1 ml-2">
-                                    <button onClick={(e) => { e.stopPropagation(); moveLayer(item.obj, 'up'); }} title="Puja" className="p-1 hover:bg-gray-200 rounded">
+                                    <button onClick={(e) => { moveLayer(item.obj, 'up'); }} title="Puja" disabled={item.zIndex === canvas.getObjects().length - 1} className="p-1 hover:bg-gray-200 rounded">
                                         <ArrowUp className="w-4 h-4 text-gray-600" />
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); moveLayer(item.obj, 'down'); }} title="Baixa" className="p-1 hover:bg-gray-200 rounded">
+                                    <button onClick={(e) => { moveLayer(item.obj, 'down'); }} title="Baixa" disabled={item.zIndex === 0} className="p-1 hover:bg-gray-200 rounded">
                                         <ArrowDown className="w-4 h-4 text-gray-600" />
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); toggleVisibility(item.obj); }} title="Mostra/Amaga" className="p-1 hover:bg-gray-200 rounded">
+                                    <button onClick={(e) => { toggleVisibility(item.obj); }} title="Mostra/Amaga" className="p-1 hover:bg-gray-200 rounded">
                                         {item.obj.visible ? (
                                             <Eye className="w-4 h-4 text-gray-600" />
                                         ) : (
                                             <EyeOff className="w-4 h-4 text-gray-600" />
                                         )}
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); toggleLock(item.obj); }} title="Bloqueja/Desbloqueja" className="p-1 hover:bg-gray-200 rounded">
+                                    <button onClick={(e) => { toggleLock(item.obj); }} title="Bloqueja/Desbloqueja" className="p-1 hover:bg-gray-200 rounded">
                                         {item.obj.selectable ? (
                                             <Unlock className="w-4 h-4 text-gray-600" />
                                         ) : (
