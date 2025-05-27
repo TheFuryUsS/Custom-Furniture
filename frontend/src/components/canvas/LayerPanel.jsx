@@ -6,6 +6,7 @@ export default function LayerPanel({ canvas }) {
     const [editingId, setEditingId] = useState(null);
     const [nameInput, setNameInput] = useState('');
     const [activeObject, setActiveObject] = useState(null);
+    const [draggedIndex, setDraggedIndex] = useState(null);
 
     useEffect(() => {
         if (!canvas) return;
@@ -40,11 +41,13 @@ export default function LayerPanel({ canvas }) {
                 id: obj.id || index,
                 type: obj.type,
                 obj,
-                name: obj.layerName || `${obj.type.charAt(0).toUpperCase() + obj.type.slice(1)}`
+                name: obj.layerName || `${obj.type.charAt(0).toUpperCase() + obj.type.slice(1)}`,
+                zIndex: index
             }));
 
         setObjects(objs.reverse());
     };
+
 
     const selectObject = (obj) => {
         canvas.setActiveObject(obj);
@@ -73,29 +76,17 @@ export default function LayerPanel({ canvas }) {
         refreshObjects();
     };
 
-    const moveLayer = (obj, direction) => {
-        const objects = canvas.getObjects();
-        const index = objects.indexOf(obj);
-        let newIndex = index;
+    const reorderObject = (fromIndex, toIndex) => {
+        const objs = canvas.getObjects();
+        if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
 
-        if (direction === 'up' && index < objects.length - 1) {
-            newIndex = index + 1;
-        } else if (direction === 'down' && index > 0) {
-            newIndex = index - 1;
-        } else {
-            return;
-        }
+        const [moved] = objs.splice(fromIndex, 1);
+        objs.splice(toIndex, 0, moved);
 
-        objects.splice(index, 1);
-        objects.splice(newIndex, 0, obj);
-
-        canvas._objects = objects;
-
+        canvas._objects = objs;
         canvas.renderAll();
         refreshObjects();
     };
-
-
 
     const startEditing = (id, currentName) => {
         setEditingId(id);
@@ -132,6 +123,8 @@ export default function LayerPanel({ canvas }) {
     };
 
 
+
+
     return (
         <div className="absolute mt-4 right-4 z-50 w-72 max-h-[75vh] overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md p-2">
             <h3 className="font-semibold text-sm mb-2 px-1">Capes</h3>
@@ -141,7 +134,22 @@ export default function LayerPanel({ canvas }) {
                     .map((item, i) => {
                         const isSelected = activeObject === item.obj;
                         return (
-                            <li key={i} onClick={() => selectObject(item.obj)} onDoubleClick={() => startEditing(item.id, item.obj.layerName || item.name)} className={`flex items-center justify-between p-2 rounded transition cursor-pointer ${!item.obj.visible ? 'opacity-50' : ''} ${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'}`}>
+                            <li
+                                key={i}
+                                draggable
+                                onDragStart={() => {setDraggedIndex(i); selectObject(item.obj)}}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={() => {
+                                    if (draggedIndex === null || draggedIndex === i) return;
+                                    const from = objects.length - 1 - draggedIndex;
+                                    const to = objects.length - 1 - i;
+                                    reorderObject(from, to);
+                                    setDraggedIndex(null);
+                                }}
+                                onClick={() => selectObject(item.obj)}
+                                onDoubleClick={() => startEditing(item.id, item.obj.layerName || item.name)}
+                                className={`flex items-center justify-between p-2 rounded transition cursor-pointer ${!item.obj.visible ? 'opacity-50' : ''} ${activeObject === item.obj ? 'bg-blue-100' : 'hover:bg-gray-100'} ${draggedIndex === i ? 'border border-blue-300' : ''}`}
+                            >
                                 <div className="flex-1">
                                     {editingId === item.id ? (
                                         <input autoFocus value={nameInput} onChange={(e) => setNameInput(e.target.value)} onBlur={() => saveName(item)}
@@ -162,12 +170,7 @@ export default function LayerPanel({ canvas }) {
                                 </div>
 
                                 <div className="flex items-center space-x-1 ml-2">
-                                    <button onClick={(e) => { moveLayer(item.obj, 'up'); }} title="Puja" disabled={item.zIndex === canvas.getObjects().length - 1} className="p-1 hover:bg-gray-200 rounded">
-                                        <ArrowUp className="w-4 h-4 text-gray-600" />
-                                    </button>
-                                    <button onClick={(e) => { moveLayer(item.obj, 'down'); }} title="Baixa" disabled={item.zIndex === 0} className="p-1 hover:bg-gray-200 rounded">
-                                        <ArrowDown className="w-4 h-4 text-gray-600" />
-                                    </button>
+
                                     <button onClick={(e) => { toggleVisibility(item.obj); }} title="Mostra/Amaga" className="p-1 hover:bg-gray-200 rounded">
                                         {item.obj.visible ? (
                                             <Eye className="w-4 h-4 text-gray-600" />
