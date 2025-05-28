@@ -2,10 +2,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 
+// Almenys 8 chars, majuscula, minuscula, numero i simbol
+const FORMATPASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 
 // User register
 exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
+
+    if (!FORMATPASSWORD.test(password)) {
+        return res.status(400).json({
+            error: 'La contrasenya ha de tenir almenys 8 caràcters, incloure majúscules, minúscules, dígits i símbols.'
+        });
+    }
+
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = await pool.query(
