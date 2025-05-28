@@ -62,6 +62,7 @@ export default function CanvasEditor() {
                 const pathMoble = IMAGE_PATHS[designType];
 
                 fabric.Image.fromURL(imgMoble).then((img) => {
+                    img.crossOrigin = "anonymous";
                     const canvasW = canvas.getWidth();
                     const canvasH = canvas.getHeight();
 
@@ -102,7 +103,7 @@ export default function CanvasEditor() {
 
                         canvas.requestRenderAll();
                     });
-                }, 0);
+                }, 0, { crossOrigin: 'anonymous' });
 
                 if (designData) {
                     canvas.loadFromJSON(designData, () => {
@@ -132,7 +133,8 @@ export default function CanvasEditor() {
                 console.log("URL:", fullImageUrl);
 
                 if (fullImageUrl) {
-                    const img = await fabric.Image.fromURL(fullImageUrl);
+                    const img = await fabric.Image.fromURL(fullImageUrl, { crossOrigin: 'anonymous' });
+                    img.crossOrigin = "anonymous";
 
                     const maxWidth = 150;
                     const scaleFactor = maxWidth / img.width;
@@ -179,23 +181,31 @@ export default function CanvasEditor() {
     };
 
     const handleUndo = () => {
-    
+
     };
 
 
 
     const handleRedo = () => {
-        
+
     };
 
 
     const handleExport = () => {
         if (!canvas) return;
-        const dataURL = canvas.toDataURL({ format: 'png' });
-        const a = document.createElement('a');
-        a.href = dataURL;
-        a.download = 'disseny.png';
-        a.click();
+        canvas.renderAll();
+
+        const dataURL = canvas.toDataURL({
+            format: 'png',
+            quality: 1.0,
+            enableRetinaScaling: true,
+            multiplier: 2,
+        });
+
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = `disseny-${id}.png`;
+        link.click();
     };
 
 

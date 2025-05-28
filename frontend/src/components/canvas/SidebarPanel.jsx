@@ -52,8 +52,8 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
             console.log(imageUrl)
             const fullImageUrl = `http://localhost:3000${imageUrl}`;
 
-            const img = await fabric.Image.fromURL(fullImageUrl);
-
+            const img = await fabric.Image.fromURL(fullImageUrl, { crossOrigin: 'anonymous' });
+            img.crossOrigin = "anonymous";
 
             const maxWidth = 150;
             const scaleFactor = maxWidth / img.width;
@@ -225,7 +225,7 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
             {showQr && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg text-center relative w-80">
-                        <button onClick={() => { onTriggerQr(false); setShowQr(false)}} className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition" title="Tancar">
+                        <button onClick={() => { onTriggerQr(false); setShowQr(false) }} className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 transition" title="Tancar">
                             <X className="h-5 w-5 text-gray-500 hover:text-gray-800 transition" />
                         </button>
                         <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center leading-snug">
