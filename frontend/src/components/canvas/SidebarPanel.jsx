@@ -186,7 +186,7 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
                 <div className="w-full h-px bg-gray-300 my-2" />
 
                 {/* IMATGE i IMATGEQR */}
-                <label className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
+                <label title="Puja una imatge" className="cursor-pointer p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
                     <ImageIcon className="w-5 h-5 text-gray-700" />
                     <input type="file" accept="image/*" onChange={addImage} className="hidden" />
                 </label>
@@ -206,6 +206,7 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
                 {/* COLORPICKER */}
                 <input
                     type="color"
+                    title="Escull el color"
                     value={color}
                     onChange={handleColorChange}
                     className="w-10 h-10 rounded-md border border-gray-300"

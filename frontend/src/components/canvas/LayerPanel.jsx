@@ -48,7 +48,6 @@ export default function LayerPanel({ canvas }) {
         setObjects(objs.reverse());
     };
 
-
     const selectObject = (obj) => {
         canvas.setActiveObject(obj);
         canvas.requestRenderAll();
@@ -123,12 +122,12 @@ export default function LayerPanel({ canvas }) {
     };
 
 
-
-
     return (
         <div className="absolute mt-4 right-4 z-50 w-72 max-h-[75vh] overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md p-2">
             <h3 className="font-semibold text-sm mb-2 px-1">Capes</h3>
             <ul className="space-y-1 text-sm">
+
+                {/* OBJECTES */}
                 {objects
                     .filter(item => item && item.obj)
                     .map((item, i) => {
@@ -137,7 +136,7 @@ export default function LayerPanel({ canvas }) {
                             <li
                                 key={i}
                                 draggable
-                                onDragStart={() => {setDraggedIndex(i); selectObject(item.obj)}}
+                                onDragStart={() => { setDraggedIndex(i); selectObject(item.obj) }}
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={() => {
                                     if (draggedIndex === null || draggedIndex === i) return;
@@ -150,6 +149,7 @@ export default function LayerPanel({ canvas }) {
                                 onDoubleClick={() => startEditing(item.id, item.obj.layerName || item.name)}
                                 className={`flex items-center justify-between p-2 rounded transition cursor-pointer ${!item.obj.visible ? 'opacity-50' : ''} ${activeObject === item.obj ? 'bg-blue-100' : 'hover:bg-gray-100'} ${draggedIndex === i ? 'border border-blue-300' : ''}`}
                             >
+                                {/* Nom */}
                                 <div className="flex-1">
                                     {editingId === item.id ? (
                                         <input autoFocus value={nameInput} onChange={(e) => setNameInput(e.target.value)} onBlur={() => saveName(item)}
@@ -170,7 +170,7 @@ export default function LayerPanel({ canvas }) {
                                 </div>
 
                                 <div className="flex items-center space-x-1 ml-2">
-
+                                    {/* Mostrar/Ocultar */}
                                     <button onClick={(e) => { toggleVisibility(item.obj); }} title="Mostra/Amaga" className="p-1 hover:bg-gray-200 rounded">
                                         {item.obj.visible ? (
                                             <Eye className="w-4 h-4 text-gray-600" />
@@ -178,6 +178,8 @@ export default function LayerPanel({ canvas }) {
                                             <EyeOff className="w-4 h-4 text-gray-600" />
                                         )}
                                     </button>
+
+                                    {/* Lock/Unlock */}
                                     <button onClick={(e) => { toggleLock(item.obj); }} title="Bloqueja/Desbloqueja" className="p-1 hover:bg-gray-200 rounded">
                                         {item.obj.selectable ? (
                                             <Unlock className="w-4 h-4 text-gray-600" />
@@ -185,6 +187,8 @@ export default function LayerPanel({ canvas }) {
                                             <Lock className="w-4 h-4 text-gray-600" />
                                         )}
                                     </button>
+
+                                    {/* Eliminar */}
                                     <button onClick={(e) => { e.stopPropagation(); deleteObject(item.obj); }} title="Esborra" className="p-1 hover:bg-red-100 rounded">
                                         <Trash className="w-4 h-4 text-red-500" />
                                     </button>

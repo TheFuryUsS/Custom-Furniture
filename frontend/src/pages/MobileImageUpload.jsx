@@ -1,10 +1,24 @@
-import { useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import api from '../lib/api';
 
 export default function MobileImageUpload() {
     const { designId } = useParams();
     const [file, setFile] = useState(null);
+    const navigate = useNavigate();
+
+    // Provar quan estigui funcional a internet (Evita accedir manualment al upload d'altres dissenys)
+    /*useEffect(() => {
+        api.get(`/designs/${designId}`)
+            .then(res => {
+                if (!res.data || !res.data.id) {
+                    navigate('/designs');
+                }
+            })
+            .catch(() => {
+                navigate('/designs');
+            });
+    }, [designId, navigate]);*/
 
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -41,7 +41,7 @@ exports.getDesignById = async (req, res) => {
 // Crear un nou disseny
 exports.createDesign = async (req, res) => {
     const userId = req.user.id;
-    const { name, data, type } = req.body; // data en format JSON
+    const { name, data, type } = req.body;
 
     try {
         const result = await pool.query(
@@ -94,7 +94,7 @@ exports.updateDesign = async (req, res) => {
 
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Error actualitzant el disseny:', err);
+        console.error('Error al actualitzar el disseny:', err);
         res.status(500).json({ error: 'Error al actualitzar el disseny' });
     }
 };
@@ -119,12 +119,12 @@ exports.uploadImage = async (req, res) => {
             [imagePath, designId, userId]);
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Disseny no trobat o no tens permisos' });
+            return res.status(404).json({ error: 'Disseny no trobat o sense permisos' });
         }
 
         res.status(200).json({ message: 'Imatge pujada correctament', imageUrl: imagePath });
     } catch (err) {
-        console.error('Error pujant la imatge:', err);
+        console.error('Error al pujar la imatge:', err);
         res.status(500).json({ error: 'Error al pujar la imatge' });
     }
 };
@@ -141,7 +141,20 @@ exports.uploadImageDirect = async (req, res) => {
 
     const imagePath = `/uploads/${req.file.filename}`;
 
-    res.status(200).json({ message: 'Imatge pujada directament correctament', imageUrl: imagePath });
+    try {
+        const result = await pool.query(`
+            SELECT * FROM designs WHERE id = $1 AND user_id = $2`,
+            [designId, userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(403).json({ error: 'Sense permisos per aquest disseny' });
+        }
+
+        res.status(200).json({ message: 'Imatge pujada correctament', imageUrl: imagePath });
+    } catch (err) {
+        console.error('Error pujant la imatge:', err);
+        res.status(500).json({ error: 'Error al pujar la imatge' });
+    }
 };
 
 
