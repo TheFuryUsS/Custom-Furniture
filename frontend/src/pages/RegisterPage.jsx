@@ -8,40 +8,21 @@ const FORMATPASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({ username: '', email: '', password: '' });
-    const [error, setError] = useState({});
+    const [error, setError] = useState('');
     const navigate = useNavigate();
-
-    const validate = (name, value) => {
-        let msg;
-        if (!value) msg = 'Camp obligatori';
-        else {
-            if (name === 'password' && !FORMATPASSWORD.test(value)) {
-                msg = 'Mínim 8 caràcters, inclou majúscules, minúscules, dígits i símbols';
-            }
-        }
-        setError(err => ({ ...err, [name]: msg }));
-    };
 
     const handleChange = e => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-        validate(name, value);
-    };
-
-    const isFormValid = () => {
-        return (
-            formData.username &&
-            formData.email &&
-            formData.password &&
-            !error.username &&
-            !error.email &&
-            !error.password
-        );
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleSubmit = async e => {
         e.preventDefault();
-        if (!isFormValid()) return;
+
+        if (!FORMATPASSWORD.test(formData.password)) {
+            setError('Mínim 8 caràcters, inclou majúscules, minúscules, dígits i símbols');
+            return;
+        }
 
         try {
             const res = await api.post('/users/register', formData);
@@ -53,29 +34,27 @@ export default function RegisterPage() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-20 p-4 border rounded">
-            <h2 className="text-lg mb-2">Crear un compte</h2>
+        <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto mt-20 px-4 sm:px-6 py-6 bg-white border rounded-xl shadow-md">
+            <h2 className="text-2xl font-semibold text-center mb-6">Crear un compte</h2>
             <div className="mb-4">
-                <input name="username" value={formData.username} onChange={handleChange} placeholder="Nom d'usuari" className="w-full p-2 border mb-4" />
-                {error.username && <p className="text-red-600 text-sm">{error.username}</p>}
+                <input name="username" value={formData.username} onChange={handleChange} placeholder="Nom d'usuari" className="w-full p-3 border mb-4" required />
             </div>
 
             <div className="mb-4">
-                <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Correu electrònic" className="w-full p-2 border mb-4" />
-                {error.email && <p className="text-red-600 text-sm">{error.email}</p>}
+                <input name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Correu electrònic" className="w-full p-3 border mb-4" required />
             </div>
 
             <div className="mb-4">
-                <input name="password" type="password" value={formData.password} onChange={handleChange} placeholder="Contrasenya" className="w-full p-2 border mb-4" />
-                {error.password && <p className="text-red-600 text-sm">{error.password}</p>}
+                <input name="password" type="password" value={formData.password} onChange={handleChange} placeholder="Contrasenya" className="w-full p-3 border mb-4" required />
+                {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
             </div>
 
 
-            <button type="submit" disabled={!isFormValid()} className={`w-full p-2 rounded-md text-white ${isFormValid() ? 'bg-green-700 hover:bg-green-900' : 'bg-gray-400 cursor-not-allowed'}`}>Registrar-se</button>
+            <button type="submit" className="w-full py-3 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-md transition duration-200">Registrar-se</button>
 
             <div>
-                <p className="mt-4 text-center">
-                    Ja tens un compte? <a href="/login" className="text-blue-600 hover:text-blue-900 hover:underline">Inicia sessió aquí</a>
+                <p className="mt-6 text-center text-sm text-gray-600">
+                    Ja tens un compte? <a href="/login" className="text-blue-600 hover:text-blue-800 hover:underline">Inicia sessió aquí</a>
                 </p>
             </div>
         </form>

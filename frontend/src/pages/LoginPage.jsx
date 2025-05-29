@@ -23,22 +23,22 @@ export default function LoginPage() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-20 p-4 border rounded">
-            <h2 className="text-lg mb-2">Iniciar sessió</h2>
+        <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto mt-20 px-4 sm:px-6 py-6 bg-white border rounded-xl shadow-md">
+            <h2 className="text-2xl font-semibold text-center mb-6">Iniciar sessió</h2>
             {successMessage && (
-                <div className="mb-4 p-2 bg-green-100 text-green-800 rounded">
+                <div className="mb-4 p-3 bg-green-100 text-green-800 rounded-md text-sm text-center">
                     {successMessage}
                 </div>
             )}
 
-            <input className="w-full p-2 border mb-4" placeholder="Username o email" value={username_or_email} onChange={e => setUsernameOrEmail(e.target.value)}/>
-            <input type="password" className="w-full p-2 border mb-4" placeholder="Contrasenya" value={password} onChange={e => setPassword(e.target.value)}/>
-            <button type="submit" className="w-full p-2 bg-blue-600 hover:bg-blue-900 rounded-md transition-colors duration-100 text-white">
+            <input className="w-full p-3 border mb-4" placeholder="Username o email" value={username_or_email} onChange={e => setUsernameOrEmail(e.target.value)} required />
+            <input type="password" className="w-full p-3 border mb-4" placeholder="Contrasenya" value={password} onChange={e => setPassword(e.target.value)} required />
+            <button type="submit" className="w-full p-3 bg-blue-600 hover:bg-blue-900 rounded-md transition-colors duration-100 text-white">
                 Entrar
             </button>
 
             <div>
-                <p className="mt-4 text-center">
+                <p className="mt-6 text-center text-sm text-gray-600">
                     Encara no tens un compte? <a href="/register" className="text-blue-600 hover:text-blue-900 hover:underline">Registra't aquí</a>
                 </p>
             </div>
