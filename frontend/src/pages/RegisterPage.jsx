@@ -14,6 +14,10 @@ export default function RegisterPage() {
     const handleChange = e => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+
+        if (name === 'password' && FORMATPASSWORD.test(value)) {
+            setError('');
+        }
     };
 
     const handleSubmit = async e => {
