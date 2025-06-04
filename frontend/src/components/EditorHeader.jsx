@@ -9,38 +9,45 @@ export default function EditorHeader() {
     const [allDesigns, setAllDesigns] = useState([]);
 
 
-    // Llegeix nom inicial disseny i guarda llista de tots (això cada vegada que canvia id, per exemple si es mouen a un altre disseny utilitzant el navegador i introduint el numero a mà)
     useEffect(() => {
-        const fetchDesigns = async () => {
+        const fetchAllDesigns = async () => {
             try {
                 const res = await api.get('/designs');
                 setAllDesigns(res.data);
-                const current = res.data.find(d => d.id === Number(id));
-                if (current) {
-                    setDesignName(current.name || '');
-                    setOriginalName(current.name || '');
-                }
             } catch (err) {
-                console.error('Error carregant els dissenys:', err);
+                console.error('Error carregant tots els dissenys:', err);
             }
         };
 
-        fetchDesigns();
+        fetchAllDesigns();
+    }, []);
+
+    useEffect(() => {
+        const fetchCurrentDesign = async () => {
+            try {
+                const res = await api.get(`/designs/${id}`);
+                const current = res.data;
+                setDesignName(current.name || '');
+                setOriginalName(current.name || '');
+            } catch (err) {
+                console.error('Error carregant el disseny:', err);
+            }
+        };
+        fetchCurrentDesign();
     }, [id]);
 
-    // Funció per actualitzar el nom
     const updateName = async () => {
         const nameTrimmed = designName.trim();
-        if (!nameTrimmed || nameTrimmed === originalName) return;
+        if (!nameTrimmed || nameTrimmed === originalName) {
+            setDesignName(originalName);
+            return;
+        }
 
-        const nameExists = allDesigns.some(d =>
-            d.id !== Number(id) &&
-            d.name.trim().toLowerCase() === nameTrimmed.toLowerCase()
-        );
+        const nameExists = allDesigns.some(d => d.name.trim().toLowerCase() === nameTrimmed.trim().toLowerCase() && d.id !== id);
 
         if (nameExists) {
             alert('Ja existeix un altre disseny amb aquest nom.');
-            setDesignName(originalName); // Mostra alerta i es reverteix el canvi
+            setDesignName(originalName);
             return;
         }
 
@@ -50,12 +57,12 @@ export default function EditorHeader() {
         } catch (err) {
             console.error('Error actualitzant el nom:', err);
             alert('No s’ha pogut actualitzar el nom');
+            setDesignName(originalName);
         }
     };
 
-    // Enter guarda l'input
     const handleKey = (e) => {
-        if (e.key === 'Enter') e.target.blur();
+        if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
     };
 
     return (
