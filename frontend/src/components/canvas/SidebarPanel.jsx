@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
 import { Pencil, Square, Circle, Triangle, Type, Slash, ImagePlus as ImageIcon, QrCode as QrCodeIcon, Trash, X } from 'lucide-react';
@@ -10,6 +10,21 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
     const [isDrawing, setIsDrawing] = useState(false);
     const [showQr, setShowQr] = useState(false);
     const navigate = useNavigate();
+
+
+    useEffect(() => {
+        if (!canvas) return;
+
+        const handlePathCreated = (canv) => {
+            canvas.setActiveObject(canv.path);
+            canvas.requestRenderAll();
+        };
+
+        canvas.on('path:created', handlePathCreated);
+        return () => {
+            canvas.off('path:created', handlePathCreated);
+        };
+    }, [canvas]);
 
 
     const setDrawingMode = () => {
