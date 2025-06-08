@@ -119,6 +119,57 @@ export default function CanvasEditor() {
             });
     }, [canvas, id]);
 
+    // useEffect per HandeKey, per si l'usuari esta editant i apreta x key
+    useEffect(() => {
+        if (!canvas) return;
+
+        const handleKeyDown = (e) => {
+            const active = canvas.getActiveObject();
+            if (!active) return;
+
+            let moved = false;
+            const pixels = 2;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                    active.top -= pixels;
+                    moved = true;
+                    break;
+                case 'ArrowDown':
+                    active.top += pixels;
+                    moved = true;
+                    break;
+                case 'ArrowLeft':
+                    active.left -= pixels;
+                    moved = true;
+                    break;
+                case 'ArrowRight':
+                    active.left += pixels;
+                    moved = true;
+                    break;
+                case 'Enter':
+                case 'Escape':
+                    canvas.discardActiveObject();
+                    break;
+                default:
+                    return;
+            }
+
+            e.preventDefault();
+            if (moved) {
+                active.setCoords();
+                canvas.requestRenderAll();
+                canvas.calcOffset();
+            } else {
+                canvas.requestRenderAll();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [canvas]);
 
     // useEffect per quan arriba l'imatge del QR, inserir-la automàticament
     useEffect(() => {
