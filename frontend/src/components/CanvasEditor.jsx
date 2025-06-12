@@ -202,7 +202,7 @@ export default function CanvasEditor() {
                     canvas.setActiveObject(img);
                     canvas.requestRenderAll();
 
-                    await api.delete(`/designs/${id}/image`);
+
 
                     clearInterval(interval);
                     setWaitingForQrImage(false);
@@ -264,7 +264,10 @@ export default function CanvasEditor() {
         <div className="flex h-screen">
             <div className="flex flex-col">
                 <TopMenu onSave={handleSave} onExport={handleExport} onUndo={handleUndo} onRedo={handleRedo} />
-                <SidebarPanel canvas={canvas} onSave={handleSave} designId={id} onTriggerQr={(waiting) => setWaitingForQrImage(waiting)} />
+                <SidebarPanel canvas={canvas} onSave={handleSave} designId={id} onTriggerQr={async (waiting) => {
+                    setWaitingForQrImage(waiting);
+                    await api.delete(`/designs/${id}/image`);
+                }} />
             </div>
             <LayerPanel canvas={canvas} />
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
