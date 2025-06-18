@@ -8,6 +8,7 @@ import api from '../../lib/api';
 export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) {
     const [color, setColor] = useState('#000000');
     const [isDrawing, setIsDrawing] = useState(false);
+    const [brushSize, setBrushSize] = useState(5);
     const [showQr, setShowQr] = useState(false);
     const navigate = useNavigate();
 
@@ -35,7 +36,7 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
             canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
         }
         canvas.freeDrawingBrush.color = color;
-        canvas.freeDrawingBrush.width = 5;
+        canvas.freeDrawingBrush.width = brushSize;
     };
 
     const centerObject = (object) => {
@@ -181,6 +182,43 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
                     <button onClick={setDrawingMode} title="Pinzell" className={`p-2 rounded-md transition-colors duration-100 ${isDrawing ? 'bg-blue-100' : 'hover:bg-gray-200'}`}>
                         <Pencil className={`w-5 h-5 ${isDrawing ? 'text-blue-600' : 'text-gray-700'}`} />
                     </button>
+                    {isDrawing && (
+                        <div className="flex flex-col items-center gap-1">
+                            <input
+                                type="range"
+                                min="1"
+                                max="50"
+                                value={brushSize}
+                                onChange={(e) => {
+                                    const newSize = parseInt(e.target.value);
+                                    setBrushSize(newSize);
+                                    if (canvas && canvas.freeDrawingBrush) {
+                                        canvas.freeDrawingBrush.width = newSize;
+                                    }
+                                }}
+                                className="w-9"
+                                title="Mida del pinzell"
+                            />
+                            <input
+                                type="number"
+                                min="1"
+                                max="50"
+                                value={brushSize}
+                                onChange={(e) => {
+                                    const newSize = parseInt(e.target.value);
+                                    if (!isNaN(newSize) && newSize >= 1 && newSize <= 50) {
+                                        setBrushSize(newSize);
+                                        if (canvas && canvas.freeDrawingBrush) {
+                                            canvas.freeDrawingBrush.width = newSize;
+                                        }
+                                    }
+                                }}
+                                className="w-9 text-xs px-1 py-0.5 border border-gray-300 rounded-md text-left"
+                                title="Mida del pinzell"
+                            />
+                        </div>
+                    )}
+
                     <button onClick={() => addShape('rect')} title="Quadrat" className="p-2 hover:bg-gray-200 rounded-md transition-colors duration-100">
                         <Square className="w-5 h-5 text-gray-700" />
                     </button>
