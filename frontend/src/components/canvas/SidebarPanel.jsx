@@ -213,6 +213,7 @@ export default function SidebarPanel({ canvas, onSave, designId, onTriggerQr }) 
                                         }
                                     }
                                 }}
+                                onFocus={(e) => e.target.select()}
                                 className="w-9 text-xs px-1 py-0.5 border border-gray-300 rounded-md text-left"
                                 title="Mida del pinzell"
                             />
