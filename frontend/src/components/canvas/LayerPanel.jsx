@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, Lock, Unlock, ArrowUp, ArrowDown, Pencil, Square, Circle, Triangle, Type, Slash, ImagePlus as ImageIcon, QrCode as QrCodeIcon, Trash, X } from 'lucide-react';
 
-export default function LayerPanel({ canvas }) {
+export default function LayerPanel({ canvas, onClose }) {
     const [objects, setObjects] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [nameInput, setNameInput] = useState('');
@@ -124,7 +124,17 @@ export default function LayerPanel({ canvas }) {
 
     return (
         <div className="absolute mt-4 right-4 z-50 w-72 max-h-[75vh] overflow-y-auto bg-white border border-gray-200 rounded-md shadow-md p-2">
-            <h3 className="font-semibold text-sm mb-2 px-1">Capes</h3>
+            <div className="flex justify-between items-center mb-2 px-1">
+                <h3 className="font-semibold text-sm">Capes</h3>
+                <button
+                    onClick={onClose}
+                    className="p-1 hover:bg-gray-200 rounded"
+                    title="Amaga capes"
+                >
+                    <X className="w-4 h-4 text-gray-600" />
+                </button>
+            </div>
+
             <ul className="space-y-1 text-sm">
 
                 {/* OBJECTES */}
@@ -170,6 +180,34 @@ export default function LayerPanel({ canvas }) {
                                 </div>
 
                                 <div className="flex items-center space-x-1 ml-2">
+                                    {/* Moure amunt mòbil */}
+                                    <button
+                                        onClick={(e) => {
+                                            const from = objects.length - 1 - i;
+                                            const to = from + 1;
+                                            reorderObject(from, to);
+                                        }}
+                                        title="Mou capa amunt"
+                                        className="p-1 hover:bg-gray-200 rounded"
+                                        disabled={i === 0}
+                                    >
+                                        <ArrowUp className="w-4 h-4 text-gray-600" />
+                                    </button>
+
+                                    {/* Moure avall mòbil */}
+                                    <button
+                                        onClick={(e) => {
+                                            const from = objects.length - 1 - i;
+                                            const to = from - 1;
+                                            reorderObject(from, to);
+                                        }}
+                                        title="Mou capa avall"
+                                        className="p-1 hover:bg-gray-200 rounded"
+                                        disabled={i === objects.length - 1}
+                                    >
+                                        <ArrowDown className="w-4 h-4 text-gray-600" />
+                                    </button>
+
                                     {/* Mostrar/Ocultar */}
                                     <button onClick={(e) => { toggleVisibility(item.obj); }} title="Mostra/Amaga" className="p-1 hover:bg-gray-200 rounded">
                                         {item.obj.visible ? (

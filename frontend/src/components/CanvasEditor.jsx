@@ -5,11 +5,15 @@ import api from '../lib/api';
 import SidebarPanel from './canvas/SidebarPanel';
 import TopMenu from './canvas/TopMenu';
 import LayerPanel from './canvas/LayerPanel';
+import { Layers } from 'lucide-react';
 
 export default function CanvasEditor() {
     const canvasRef = useRef(null);
     const [canvas, setCanvas] = useState(null);
     const [waitingForQrImage, setWaitingForQrImage] = useState(false);
+    const [showLayerPanel, setShowLayerPanel] = useState(false);
+
+
     const { id } = useParams();
 
 
@@ -261,7 +265,7 @@ export default function CanvasEditor() {
 
 
     return (
-        <div className="flex h-screen">
+        <div className="flex h-screen relative">
             <div className="flex flex-col">
                 <TopMenu onSave={handleSave} onExport={handleExport} onUndo={handleUndo} onRedo={handleRedo} />
                 <SidebarPanel canvas={canvas} onSave={handleSave} designId={id} onTriggerQr={async (waiting) => {
@@ -269,7 +273,21 @@ export default function CanvasEditor() {
                     await api.delete(`/designs/${id}/image`);
                 }} />
             </div>
-            <LayerPanel canvas={canvas} />
+
+            <button
+                className="absolute top-4 right-4 z-150 gap-1 bg-white border border-gray-200 rounded-md shadow-sm p-2 hover:bg-gray-200 transition-colors duration-100"
+                onClick={() => setShowLayerPanel(true)}
+                aria-label="Toggle Layer Panel"
+            >
+                <Layers />
+            </button>
+
+            {showLayerPanel && (
+                <LayerPanel canvas={canvas} onClose={() => setShowLayerPanel(false)} />
+                
+            )}
+
+
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                 <canvas ref={canvasRef} className="border border-black rounded-sm shadow-sm" />
             </div>
