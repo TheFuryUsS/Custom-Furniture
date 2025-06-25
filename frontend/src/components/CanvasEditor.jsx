@@ -12,6 +12,7 @@ export default function CanvasEditor() {
     const [canvas, setCanvas] = useState(null);
     const [waitingForQrImage, setWaitingForQrImage] = useState(false);
     const [showLayerPanel, setShowLayerPanel] = useState(false);
+    const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
 
 
     const { id } = useParams();
@@ -35,8 +36,10 @@ export default function CanvasEditor() {
     // Inicialitza Fabric.js
     useEffect(() => {
 
-        const canvasWidth = Math.min(window.innerWidth * 0.9, 1000);
-        const canvasHeight = Math.min(window.innerHeight * 0.8, 1000);
+        const canvasWidth = Math.min(window.innerWidth * 0.8);
+        const canvasHeight = Math.min(window.innerHeight * 0.8);
+
+        setInitialSize({ width: canvasWidth, height: canvasHeight });
 
         const fabricCanvas = new fabric.Canvas(canvasRef.current, {
             width: canvasWidth,
@@ -55,7 +58,7 @@ export default function CanvasEditor() {
 
     // Segon useEffect per evitar errors quan canvas es null (només quan canvia el canvas o l'id)
     useEffect(() => {
-        if (!canvas) return;
+        if (!canvas || !initialSize.width) return;
 
         api.get(`/designs/${id}`)
             .then(res => {
@@ -67,19 +70,17 @@ export default function CanvasEditor() {
 
                 fabric.Image.fromURL(imgMoble).then((img) => {
                     img.crossOrigin = "anonymous";
-                    const canvasW = canvas.getWidth();
-                    const canvasH = canvas.getHeight();
 
-                    const scaleX = canvasW / img.width;
-                    const scaleY = canvasH / img.height;
+                    const scaleX = initialSize.width / img.width;
+                    const scaleY = initialSize.height / img.height;
                     const scale = Math.min(scaleX, scaleY);
 
                     img.scaleX = scale;
                     img.scaleY = scale;
                     img.originX = 'center';
                     img.originY = 'center';
-                    img.left = canvasW / 2;
-                    img.top = canvasH / 2;
+                    img.left = initialSize.width / 2;
+                    img.top = initialSize.height / 2;
 
                     canvas.backgroundImage = img;
                     canvas.requestRenderAll();
@@ -89,16 +90,16 @@ export default function CanvasEditor() {
                         const clipPath = new fabric.Path(pathMoble, {
                             originX: 'center',
                             originY: 'center',
-                            left: canvasW / 2,
-                            top: canvasH / 2,
+                            left: initialSize.width / 2,
+                            top: initialSize.height / 2,
                             absolutePositioned: true
                         });
 
                         // Escalat segons tipus
                         const clipScales = {
-                            moble: 1.64,
+                            moble: 1.87,
                             catifa: 0.696,
-                            lampara: 0.25,
+                            lampara: 0.26,
                         };
                         const scaleFactor = clipScales[designType];
                         clipPath.scale(scaleFactor);
@@ -121,7 +122,48 @@ export default function CanvasEditor() {
             .catch(err => {
                 console.error('Error carregant el disseny:', err);
             });
-    }, [canvas, id]);
+    }, [canvas, id, initialSize]);
+
+    // useEffect per responsive
+    /*useEffect(() => {
+        if (!canvas) return;
+
+        const handleResize = () => {
+            const newWidth = Math.min(window.innerWidth * 0.9, 1000);
+            const newHeight = Math.min(window.innerHeight * 0.8, 1000);
+            canvas.setWidth(newWidth);
+            canvas.setHeight(newHeight);
+
+            const bgImg = canvas.backgroundImage;
+            if (bgImg) {
+                const scaleX = newWidth / bgImg.width;
+                const scaleY = newHeight / bgImg.height;
+                const scale = Math.min(scaleX, scaleY);
+                bgImg.scaleX = scale;
+                bgImg.scaleY = scale;
+                bgImg.left = newWidth / 2;
+                bgImg.top = newHeight / 2;
+            }
+
+            if (canvas.clipPath) {
+                const designType = res.data?.type;
+                const clipScales = {
+                    moble: 1.64,
+                    catifa: 0.696,
+                    lampara: 0.25,
+                };
+                const scaleFactor = clipScales[designType];
+                canvas.clipPath.scale(scaleFactor);
+                canvas.clipPath.left = newWidth / 2;
+                canvas.clipPath.top = newHeight / 2;
+            }
+
+            canvas.requestRenderAll();
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [canvas]);*/
 
     // useEffect per HandeKey, per si l'usuari esta editant i apreta x key
     useEffect(() => {
@@ -132,7 +174,7 @@ export default function CanvasEditor() {
             if (!active) return;
 
             let moved = false;
-            const pixels = 2;
+            const pixels = canvas.getWidth() * 0.005;
 
             switch (e.key) {
                 case 'ArrowUp':
@@ -191,7 +233,7 @@ export default function CanvasEditor() {
                     const img = await fabric.Image.fromURL(fullImageUrl, { crossOrigin: 'anonymous' });
                     img.crossOrigin = "anonymous";
 
-                    const maxWidth = 150;
+                    const maxWidth = canvas.getWidth() * 0.15;
                     const scaleFactor = maxWidth / img.width;
 
                     img.scale(scaleFactor);
@@ -235,14 +277,33 @@ export default function CanvasEditor() {
         }
     };
 
-    const handleUndo = () => {
+    const saveState = () => {
+        /*const state = canvas.toJSON(['src']);
+        undoStack.current.push(state);
+        redoStack.current = [];*/
+    };
 
+    const handleUndo = () => {
+        /*if (undoStack.current.length === 0 || !canvas) return;
+
+        const prevState = undoStack.current.pop();
+        redoStack.current.push(canvas.toJSON(['src']));
+
+        canvas.loadFromJSON(prevState, () => {
+            canvas.renderAll();
+        });*/
     };
 
 
-
     const handleRedo = () => {
+        /*if (redoStack.current.length === 0 || !canvas) return;
 
+        const nextState = redoStack.current.pop();
+        undoStack.current.push(canvas.toJSON(['src']));
+
+        canvas.loadFromJSON(nextState, () => {
+            canvas.renderAll();
+        });*/
     };
 
 
@@ -277,18 +338,16 @@ export default function CanvasEditor() {
             <button
                 className="absolute top-4 right-4 z-150 gap-1 bg-white border border-gray-200 rounded-md shadow-sm p-2 hover:bg-gray-200 transition-colors duration-100"
                 onClick={() => setShowLayerPanel(true)}
-                aria-label="Toggle Layer Panel"
+                aria-label="Mostrar capes"
             >
                 <Layers />
             </button>
 
             {showLayerPanel && (
                 <LayerPanel canvas={canvas} onClose={() => setShowLayerPanel(false)} />
-                
             )}
 
-
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="absolute top-1/2 left-1/2 transform translate-x-[calc(-50%+3.5rem)] translate-y-[calc(-50%+0.5rem)]">
                 <canvas ref={canvasRef} className="border border-black rounded-sm shadow-sm" />
             </div>
         </div >
